@@ -20,6 +20,7 @@ public class RoomGenerator : MonoBehaviour
             Room a = new Room(new Vector2Int(Random.Range(-range, range), Random.Range(-range, range)), 10);
             Generate(a);
         }
+        Delaunay.CalculateDelaunay(rooms);
     }
     
     public void Generate(Room room) {
@@ -56,6 +57,7 @@ public class RoomGenerator : MonoBehaviour
         a.AddComponent<MeshFilter>().mesh = mesh;
         a.AddComponent<MeshRenderer>().material = material;
     }
+    
     
     
 }
