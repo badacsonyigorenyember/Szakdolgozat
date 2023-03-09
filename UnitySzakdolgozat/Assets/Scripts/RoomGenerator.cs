@@ -1,7 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using Unity.VisualScripting;
+
+
 using UnityEngine;
 
 public class RoomGenerator : MonoBehaviour
@@ -20,9 +20,11 @@ public class RoomGenerator : MonoBehaviour
             Room a = new Room(new Vector2Int(Random.Range(-range, range), Random.Range(-range, range)), 10);
             Generate(a);
         }
+
+        
         Delaunay.CalculateDelaunay(rooms);
     }
-    
+
     public void Generate(Room room) {
         foreach (var r in rooms) {
             if (room.rect.Overlaps(r.rect)) return;
@@ -54,8 +56,8 @@ public class RoomGenerator : MonoBehaviour
         GameObject a = new GameObject() {
             transform = {position = new Vector3(room.rect.x, 0, room.rect.y)}
         };
-        a.AddComponent<MeshFilter>().mesh = mesh;
-        a.AddComponent<MeshRenderer>().material = material;
+        //a.AddComponent<MeshFilter>().mesh = mesh;
+        //a.AddComponent<MeshRenderer>().material = material;
     }
     
     
