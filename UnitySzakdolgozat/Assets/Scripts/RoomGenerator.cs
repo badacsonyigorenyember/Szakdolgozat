@@ -21,8 +21,8 @@ public class RoomGenerator : MonoBehaviour
             Generate(a);
         }
 
+        Delaunay.MinimalSpanningTree(Delaunay.CalculateDelaunay(rooms), rooms[0].rect.position, rooms.Count);
         
-        Delaunay.CalculateDelaunay(rooms);
     }
 
     public void Generate(Room room) {
@@ -56,8 +56,8 @@ public class RoomGenerator : MonoBehaviour
         GameObject a = new GameObject() {
             transform = {position = new Vector3(room.rect.x, 0, room.rect.y)}
         };
-        //a.AddComponent<MeshFilter>().mesh = mesh;
-        //a.AddComponent<MeshRenderer>().material = material;
+        a.AddComponent<MeshFilter>().mesh = mesh;
+        a.AddComponent<MeshRenderer>().material = material;
     }
     
     
