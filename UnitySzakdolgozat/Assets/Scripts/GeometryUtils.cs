@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -163,8 +164,47 @@ namespace GeometryUtils
         }
         
     }
-    
-    
+
+    public class Node
+    {
+        public Vector2 pos;
+        public Node parent;
+        public int g, h;
+        
+        public int f => g + h;
+        
+        public Node(Vector2 pos, Node parent) {
+            this.pos = pos;
+            this.parent = parent;
+            g = 0;
+            h = 0;
+        }
+
+        
+
+        bool Equals(Node other) {
+            return this.pos == other.pos;
+        }
+
+        public List<Node> GetNeighbours() {
+            return new List<Node>()
+            {
+                new(new Vector2(this.pos.x - 1, this.pos.y), this),
+                new(new Vector2(this.pos.x + 1, this.pos.y), this),
+                new(new Vector2(this.pos.x, this.pos.y - 1), this),
+                new(new Vector2(this.pos.x, this.pos.y + 1), this)
+            };
+        }
+
+        public int GetDistance(Vector2 other) {
+            int dstX = (int)Math.Abs(other.x - pos.x);
+            int dstY = (int)Math.Abs(other.y - pos.y);
+
+            return dstX + dstY;
+
+        }
+
+    }
 
     
     

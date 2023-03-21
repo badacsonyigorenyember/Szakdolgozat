@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using GeometryUtils;
 
@@ -103,13 +104,13 @@ public static class Delaunay
         }
 
         foreach (var edge in mst) {
-            Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, .1f, edge.end.y), Color.magenta);
+            //Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, .1f, edge.end.y), Color.magenta);
         }
 
         return mst;
     }
 
-    public static void FinalPaths(List<Room> rooms) {
+    public static List<Edge> FinalPaths(List<Room> rooms) {
         List<Edge> fullTriangulation = CalculateDelaunay(rooms);
         List<Edge> mst = MinimalSpanningTree(fullTriangulation, rooms[0].rect.position, rooms.Count);
         List<Edge> finalPaths = new List<Edge>(mst.Count);
@@ -124,10 +125,71 @@ public static class Delaunay
         }
         foreach (var edge in finalPaths) {
             if(!mst.Contains(edge))
-                Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0, edge.end.y), Color.yellow);
+                Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0, edge.end.y), Color.black);
         }
-        
+
+        return finalPaths;
     }
-    
-    
+
+    public static List<Vector2> PathFinding(Edge edge, bool[,] map) {
+            Node start = new Node(edge.start, null);
+            List<Node> open = new List<Node>(){ start };
+            List<Node> closed = new List<Node>();
+        
+
+            while (open.Any()) {
+                Node current = open.First();
+                foreach (var node in open) {
+                    if (node.f < current.f || node.f == current.f && node.h < current.h)
+                        current = node;
+                }
+
+                open.Remove(current);
+                closed.Add(current);
+
+                if (current.pos == edge.end) {
+                    return RetracePath(start, current);
+                
+                }
+
+                foreach (var neighbour in current.GetNeighbours()) {
+                    if(closed.Any(x => x.pos == neighbour.pos))
+                        continue;
+
+                    int cost = current.g + current.GetDistance(neighbour.pos);
+
+                    if (cost < neighbour.g || !open.Any(x => x.pos == neighbour.pos)) {
+                        neighbour.g = cost;
+                        neighbour.h = neighbour.GetDistance(edge.end);
+                        neighbour.parent = current;
+                        if(!open.Any(x => x.pos == neighbour.pos))
+                            open.Add(neighbour);
+                    
+                    }
+
+                }
+            
+                closed.Add(current);
+            }
+        
+        
+
+        return null;
+    }
+
+    static List<Vector2> RetracePath(Node start, Node end) {
+        List<Vector2> path = new List<Vector2>();
+        Node current = end;
+
+        while (current.parent != null) {
+            path.Add(current.pos);
+            Debug.DrawLine(new Vector3(current.pos.x, 0, current.pos.y), new Vector3(current.parent.pos.x, 0, current.parent.pos.y), Color.yellow);
+            current = current.parent;
+        }
+
+        path.Reverse();
+        return path;
+    }
+
+
 }
