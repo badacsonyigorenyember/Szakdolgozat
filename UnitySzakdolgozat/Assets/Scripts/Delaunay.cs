@@ -43,7 +43,7 @@ public static class Delaunay
             }
 
             foreach (var edge in polygon.edges) { //create new triangles between the polygon's edges and the room.
-                TriangleUtils.AddToTriangleList(triangulation, new Triangle(point.rect.position, edge.start, edge.end));
+                TriangleUtils.AddToTriangleList(triangulation, new Triangle(point.position, edge.start, edge.end));
             }
         }
         
@@ -112,7 +112,7 @@ public static class Delaunay
 
     public static List<Edge> FinalPaths(List<Room> rooms) {
         List<Edge> fullTriangulation = CalculateDelaunay(rooms);
-        List<Edge> mst = MinimalSpanningTree(fullTriangulation, rooms[0].rect.position, rooms.Count);
+        List<Edge> mst = MinimalSpanningTree(fullTriangulation, rooms[0].position, rooms.Count);
         List<Edge> finalPaths = new List<Edge>(mst.Count);
         finalPaths.AddRange(mst);
         
@@ -148,7 +148,7 @@ public static class Delaunay
                 closed.Add(current);
 
                 if (current.pos == edge.end) {
-                    return RetracePath(start, current);
+                    return RetracePath(current);
                 
                 }
 
@@ -177,7 +177,7 @@ public static class Delaunay
         return null;
     }
 
-    static List<Vector2> RetracePath(Node start, Node end) {
+    static List<Vector2> RetracePath(Node end) {
         List<Vector2> path = new List<Vector2>();
         Node current = end;
 

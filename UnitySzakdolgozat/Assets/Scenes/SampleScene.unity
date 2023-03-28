@@ -331,8 +331,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 172d0d9f937414f01b1503211e9c1b20, type: 2}
-  roomCount: 50
-  mapSize: 75
+  roomCount: 10
+  mapSize: 25
 --- !u!4 &1763698438
 Transform:
   m_ObjectHideFlags: 0

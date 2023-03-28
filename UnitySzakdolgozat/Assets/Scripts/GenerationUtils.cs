@@ -12,10 +12,10 @@ namespace GenerationUtils
             List<int> triangles = new List<int>();
             
             foreach (var room in rooms) { 
-                Vector3 bottomLeft = new Vector3(room.rect.position.x - .5f, 0, room.rect.position.y - .5f);
-                Vector3 topLeft = new Vector3(room.rect.position.x - .5f, 0, room.rect.position.y + room.rect.height + .5f);
-                Vector3 bottomRigth = new Vector3(room.rect.position.x + room.rect.width + .5f, 0, room.rect.position.y - .5f);
-                Vector3 topRight = new Vector3(room.rect.position.x + room.rect.width + .5f, 0, room.rect.position.y + room.rect.height + .5f);
+                Vector3 bottomLeft = new Vector3(room.position.x - .5f, 0, room.position.y - .5f);
+                Vector3 topLeft = new Vector3(room.position.x - .5f, 0, room.position.y + room.height + .5f);
+                Vector3 bottomRigth = new Vector3(room.position.x + room.width + .5f, 0, room.position.y - .5f);
+                Vector3 topRight = new Vector3(room.position.x + room.width + .5f, 0, room.position.y + room.height + .5f);
     
                 Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
                 for (int i = 0; i < 6; i++) {

@@ -99,7 +99,7 @@ namespace GeometryUtils
         }
         
         public bool InsideCircumcircle(Room room) {
-            return Vector2.Distance(room.rect.position, center) < circumcircleRadius;
+            return Vector2.Distance(room.position, center) < circumcircleRadius;
         }
 
         public List<Edge> GetEdges() {
@@ -178,12 +178,6 @@ namespace GeometryUtils
             this.parent = parent;
             g = 0;
             h = 0;
-        }
-
-        
-
-        bool Equals(Node other) {
-            return this.pos == other.pos;
         }
 
         public List<Node> GetNeighbours() {

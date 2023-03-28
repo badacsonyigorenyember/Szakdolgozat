@@ -23,17 +23,25 @@ public class RoomGenerator : MonoBehaviour
         level.AddComponent<MeshCollider>();
         level.AddComponent<MeshFilter>();
         level.AddComponent<MeshRenderer>().material = material;
+        int attempts = 0;
         
         while (actualRooms < roomCount) {
-            Room room = new Room(new Vector2Int(Random.Range(-mapSize, mapSize), Random.Range(-mapSize, mapSize)), 20);
-            
-            bool overlaps = rooms.Any(r => r.rect.Overlaps(room.rect));
-            
-            if (!overlaps) {
+            Debug.Log(actualRooms);
+            if (attempts >= 100) {
+                mapSize *= (int)1.25f;
+                attempts = 0;
+            }
+                
+            Room room = new Room(mapSize, 20);
+
+            if (!rooms.Any(r => r.Overlaps(room))) {
                 rooms.Add(room);
                 actualRooms++;
+                attempts = 0;
             }
-            
+            else
+                attempts++;
+
         }
         GenerateRooms();
         List<Edge> edges = Delaunay.FinalPaths(rooms);
