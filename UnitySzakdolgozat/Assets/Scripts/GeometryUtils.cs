@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GeometryUtils
@@ -7,7 +8,7 @@ namespace GeometryUtils
 {
     public class TriangleUtils
     {
-        public static void AddToTriangleList(List<Triangle> triangulation, Triangle triangle) {
+        public static void AddToTriangleList(Triangle triangle, List<Triangle> triangulation) {
             foreach (var t in triangulation) {
                 if (t.Equals(triangle)) {
                     return;
@@ -98,8 +99,8 @@ namespace GeometryUtils
             circumcircleRadius = Vector2.Distance(center, a);
         }
         
-        public bool InsideCircumcircle(Room room) {
-            return Vector2.Distance(room.position, center) < circumcircleRadius;
+        public bool InsideCircumcircle(Vector2 point) {
+            return Vector2.Distance(point, center) < circumcircleRadius;
         }
 
         public List<Edge> GetEdges() {
@@ -146,6 +147,7 @@ namespace GeometryUtils
             return start == vertex ? end : start;
         }
         
+        
     }
     
     public class Polygon
@@ -180,14 +182,35 @@ namespace GeometryUtils
             h = 0;
         }
 
-        public List<Node> GetNeighbours() {
-            return new List<Node>()
+        public List<Node> GetNeighbours(bool[,] map, Vector2 goal) {
+
+            List<Node> neighbours = new List<Node>()
             {
                 new(new Vector2(this.pos.x - 1, this.pos.y), this),
                 new(new Vector2(this.pos.x + 1, this.pos.y), this),
                 new(new Vector2(this.pos.x, this.pos.y - 1), this),
                 new(new Vector2(this.pos.x, this.pos.y + 1), this)
             };
+            
+            return neighbours.Where(n =>
+                n.pos.x >= 0 && n.pos.x < map.GetLength(0) &&
+                n.pos.y >= 0 && n.pos.y < map.GetLength(1) &&
+                !map[(int) n.pos.x, (int) n.pos.y]).ToList();
+        }
+
+        public bool HasRoomNextToIt() {
+            for(int x = -1; x <= 1; x++) {
+                for (int y = -1; y <= 1; y++) {
+                    Vector2 position = this.pos + new Vector2(x, y);
+                    if(position.x >= 0 && position.x < GameManager.map.GetLength(0) && 
+                       position.y >= 0 && position.y < GameManager.map.GetLength(1))
+                        if (GameManager.map[(int) position.x, (int) position.y])
+                            return true;
+                }
+                
+            }
+
+            return false;
         }
 
         public int GetDistance(Vector2 other) {
@@ -197,7 +220,7 @@ namespace GeometryUtils
             return dstX + dstY;
 
         }
-
+        
     }
 
     

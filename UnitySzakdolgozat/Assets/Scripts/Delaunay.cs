@@ -1,31 +1,34 @@
 using System.Collections.Generic;
 using System.Linq;
+using GenerationUtils;
 using UnityEngine;
 using GeometryUtils;
+using Unity.IO.LowLevel.Unsafe;
 
-public static class Delaunay 
+public static class Delaunay
 {
+    private static int a;
+    
     public static List<Edge> CalculateDelaunay(List<Room> rooms) {
         List<Triangle> triangulation = new List<Triangle>();
-        Triangle superTriangle = new Triangle(new Vector2Int(-1000, -1000), new Vector2Int(1000, -1000),
-            new Vector2Int(0, 1000)); 
+        Triangle superTriangle = new Triangle(new Vector2(-10000, -10000), new Vector2(10000, -10000),
+            new Vector2(0, 10000)); 
         
-        //better supertriangle
         
         triangulation.Add(superTriangle);
         
-        foreach (var point in rooms) { //iterate through every room
+        foreach (var point in rooms) { 
             List<Triangle> badTriangles = new List<Triangle>();
 
-            foreach (var triangle in triangulation) { //if one room is inside of a circumcircle of a triangle then add the triangle to the badTriangle list
-                if (triangle.InsideCircumcircle(point)) {
-                    TriangleUtils.AddToTriangleList(badTriangles, triangle);
+            foreach (var triangle in triangulation) { 
+                if (triangle.InsideCircumcircle(point.center)) {
+                    TriangleUtils.AddToTriangleList(triangle, badTriangles);
                 }
             }
 
             Polygon polygon = new Polygon();
             
-            foreach (var triangle in badTriangles) { //iterate through every triangles in badTriangle and get their edges. If an edge is only part of one bad triangle then add it to the polygon.
+            foreach (var triangle in badTriangles) { 
                 foreach (var edge in triangle.GetEdges()) {
                     if (!TriangleUtils.TriangleListContainsEdge(badTriangles, triangle, edge)) { 
                         polygon.Add(edge);
@@ -33,7 +36,7 @@ public static class Delaunay
                 }
             }
             
-            foreach (var badTriangle in badTriangles) { //remove the bad triangles from the triangulation list.
+            foreach (var badTriangle in badTriangles) { 
                 foreach (var triangle in triangulation) {
                     if (triangle.Equals(badTriangle)) {
                         triangulation.Remove(triangle);
@@ -42,24 +45,24 @@ public static class Delaunay
                 }
             }
 
-            foreach (var edge in polygon.edges) { //create new triangles between the polygon's edges and the room.
-                TriangleUtils.AddToTriangleList(triangulation, new Triangle(point.position, edge.start, edge.end));
+            foreach (var edge in polygon.edges) { 
+                TriangleUtils.AddToTriangleList(new Triangle(point.center, edge.start, edge.end), triangulation);
             }
         }
         
     
-        for (int i = triangulation.Count - 1; i >= 0 ; i--) { //iterate through every triangles we need. If one of them contains a point from the supertriangle, delete it.
+        for (int i = triangulation.Count - 1; i >= 0 ; i--) { 
             if(triangulation[i].ContainsPoint(superTriangle.a)| triangulation[i].ContainsPoint(superTriangle.b) ||
                triangulation[i].ContainsPoint(superTriangle.c))
                 triangulation.Remove(triangulation[i]);
-            /*else {
+            else {
+                /*Debug.DrawLine(new Vector3(triangulation[i].a.x, 0, triangulation[i].a.y),
+                    new Vector3(triangulation[i].b.x, 0, triangulation[i].b.y), Color.black);
                 Debug.DrawLine(new Vector3(triangulation[i].a.x, 0, triangulation[i].a.y),
-                    new Vector3(triangulation[i].b.x, 0, triangulation[i].b.y), Color.green);
-                Debug.DrawLine(new Vector3(triangulation[i].a.x, 0, triangulation[i].a.y),
-                    new Vector3(triangulation[i].c.x, 0, triangulation[i].c.y), Color.green);
+                    new Vector3(triangulation[i].c.x, 0, triangulation[i].c.y), Color.black);
                 Debug.DrawLine(new Vector3(triangulation[i].c.x, 0, triangulation[i].c.y),
-                    new Vector3(triangulation[i].b.x, 0, triangulation[i].b.y), Color.green);
-            }*/
+                    new Vector3(triangulation[i].b.x, 0, triangulation[i].b.y), Color.black);*/
+            }
             
         }
 
@@ -110,35 +113,56 @@ public static class Delaunay
         return mst;
     }
 
-    public static List<Edge> FinalPaths(List<Room> rooms) {
+    public static List<Edge> FinalEdges(List<Room> rooms) {
         List<Edge> fullTriangulation = CalculateDelaunay(rooms);
-        List<Edge> mst = MinimalSpanningTree(fullTriangulation, rooms[0].position, rooms.Count);
+        List<Edge> mst = MinimalSpanningTree(fullTriangulation, rooms[0].center, rooms.Count);
         List<Edge> finalPaths = new List<Edge>(mst.Count);
         finalPaths.AddRange(mst);
         
+        
         foreach (var e in fullTriangulation) {
-            if (!finalPaths.Contains(e) && !finalPaths.Contains(e.Reverse())) {
+            if (!finalPaths.Any(edge => e.Equals(edge) )) {
+
                 if (Random.Range(0f, 1f) <= 0.15f) {
                     finalPaths.Add(e);
                 }
             }
         }
+
         foreach (var edge in finalPaths) {
-            if(!mst.Contains(edge))
-                Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0, edge.end.y), Color.black);
+            Room room1 = rooms[0], room2 = rooms[0];
+            foreach (var room in rooms) {
+                if (room.center == edge.start) {
+                    room1 = room;
+                    continue;
+                }
+
+                if (room.center == edge.end) 
+                    room2 = room;
+            }
+            
+            (edge.start, edge.end) = room1.SelectEndPoints(room2);
         }
+        
+        foreach (var edge in finalPaths) {
+            //Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0.1f, edge.end.y), Color.magenta);
+        }
+        
 
         return finalPaths;
     }
 
-    public static List<Vector2> PathFinding(Edge edge, bool[,] map) {
-            Node start = new Node(edge.start, null);
-            List<Node> open = new List<Node>(){ start };
-            List<Node> closed = new List<Node>();
-        
+    public static void PathFinding(List<Edge> edges, List<Room> rooms, bool[,] map) {
+        bool[,] everyPath = new bool[map.GetLength(0), map.GetLength(1)];
+        int count = 0;
 
+        foreach (var edge in edges) {
+            Node start = new Node(edge.start, null);
+            HashSet<Node> open = new HashSet<Node>(){ start };
+            HashSet<Node> closed = new HashSet<Node>();
+        
             while (open.Any()) {
-                Node current = open.First();
+                Node current = open.OrderBy(node => node.f).First();
                 foreach (var node in open) {
                     if (node.f < current.f || node.f == current.f && node.h < current.h)
                         current = node;
@@ -148,48 +172,52 @@ public static class Delaunay
                 closed.Add(current);
 
                 if (current.pos == edge.end) {
-                    return RetracePath(current);
-                
+                    RetracePath(current, everyPath);
+                    break;
                 }
 
-                foreach (var neighbour in current.GetNeighbours()) {
+                foreach (var neighbour in current.GetNeighbours(map, edge.end)) {
                     if(closed.Any(x => x.pos == neighbour.pos))
                         continue;
 
-                    int cost = current.g + current.GetDistance(neighbour.pos);
+                    int multiplyer = 10;
+                    count++;
+                    
+                    if (neighbour.HasRoomNextToIt())
+                        multiplyer += 50;
+                    if (everyPath[(int) neighbour.pos.x, (int) neighbour.pos.y]) 
+                        multiplyer = 1;
+
+                    int cost = current.g + current.GetDistance(neighbour.pos) * multiplyer;
 
                     if (cost < neighbour.g || !open.Any(x => x.pos == neighbour.pos)) {
                         neighbour.g = cost;
-                        neighbour.h = neighbour.GetDistance(edge.end);
+                        neighbour.h = neighbour.GetDistance(edge.end) * 10;
                         neighbour.parent = current;
                         if(!open.Any(x => x.pos == neighbour.pos))
                             open.Add(neighbour);
-                    
+                
                     }
 
                 }
-            
+        
                 closed.Add(current);
             }
-        
-        
-
-        return null;
+        }
+        Debug.Log(count + " count");
+        MeshGeneration.GenerateCorridors(everyPath);
     }
 
-    static List<Vector2> RetracePath(Node end) {
-        List<Vector2> path = new List<Vector2>();
+    static void RetracePath(Node end, bool[,] everyPath) {
         Node current = end;
-
         while (current.parent != null) {
-            path.Add(current.pos);
-            Debug.DrawLine(new Vector3(current.pos.x, 0, current.pos.y), new Vector3(current.parent.pos.x, 0, current.parent.pos.y), Color.yellow);
+            Vector2Int curentPos = new Vector2Int((int)current.pos.x, (int)current.pos.y);
+            everyPath[curentPos.x, curentPos.y] = true;
+            //Debug.DrawLine(new Vector3(curentPos.x, 0, curentPos.y), new Vector3(current.parent.pos.x, 0, current.parent.pos.y), Color.black);
             current = current.parent;
         }
-
-        path.Reverse();
-        return path;
+        everyPath[(int)current.pos.x, (int)current.pos.y] = true;
     }
-
-
+    
+    
 }
