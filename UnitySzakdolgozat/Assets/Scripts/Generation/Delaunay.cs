@@ -1,14 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using GenerationUtils;
 using UnityEngine;
 using GeometryUtils;
 using Unity.IO.LowLevel.Unsafe;
 
 public static class Delaunay
 {
-    private static int a;
-    
     public static List<Edge> CalculateDelaunay(List<Room> rooms) {
         List<Triangle> triangulation = new List<Triangle>();
         Triangle superTriangle = new Triangle(new Vector2(-10000, -10000), new Vector2(10000, -10000),
@@ -130,7 +127,7 @@ public static class Delaunay
         }
 
         foreach (var edge in finalPaths) {
-            Room room1 = rooms[0], room2 = rooms[0];
+            Room room1 = null, room2 = null;
             foreach (var room in rooms) {
                 if (room.center == edge.start) {
                     room1 = room;
@@ -140,16 +137,27 @@ public static class Delaunay
                 if (room.center == edge.end) 
                     room2 = room;
             }
-            
-            (edge.start, edge.end) = room1.SelectEndPoints(room2);
+
+            if (room1 != null && room2 != null) {
+                Debug.Log(" room1 " + room1);
+                (edge.start, edge.end) = room1.SelectEndPoints(room2);
+                SetRoomAsNeighbour(room1, room2);
+            }
+
         }
         
         foreach (var edge in finalPaths) {
             //Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0.1f, edge.end.y), Color.magenta);
         }
-        
 
         return finalPaths;
+    }
+
+    static void SetRoomAsNeighbour(Room a, Room b) {
+        if(!a.neighbours.Contains(b))
+            a.neighbours.Add(b);
+        if(!b.neighbours.Contains(a))
+            b.neighbours.Add(a);
     }
 
     public static void PathFinding(List<Edge> edges, List<Room> rooms, bool[,] map) {
@@ -205,7 +213,7 @@ public static class Delaunay
             }
         }
         Debug.Log(count + " count");
-        MeshGeneration.GenerateCorridors(everyPath);
+        MapGeneration.GenerateCorridors(everyPath);
     }
 
     static void RetracePath(Node end, bool[,] everyPath) {
@@ -217,6 +225,35 @@ public static class Delaunay
             current = current.parent;
         }
         everyPath[(int)current.pos.x, (int)current.pos.y] = true;
+    }
+
+    public static bool PathExists(Room start, Room end) {
+        if (end.locked)
+            return false;
+        
+        Queue<Room> rooms = new Queue<Room>();
+        HashSet<Room> visited = new HashSet<Room>();
+        rooms.Enqueue(start);
+        visited.Add(start);
+
+        while (rooms.Count > 0) {
+            Room current = rooms.Dequeue();
+            
+            if (current == end) {
+                return true;
+            }
+            
+            foreach (var neighbor in current.neighbours) {
+                Debug.Log("neighbour pos: " + neighbor.center);
+                if (!visited.Contains(neighbor) && !neighbor.locked) {
+                    rooms.Enqueue(neighbor);
+                    visited.Add(neighbor);
+                }
+            }
+        }
+
+        // Step 3: no path found
+        return false;
     }
     
     

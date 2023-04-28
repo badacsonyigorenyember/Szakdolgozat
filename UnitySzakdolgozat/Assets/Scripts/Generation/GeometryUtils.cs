@@ -146,8 +146,7 @@ namespace GeometryUtils
         public Vector2 OtherVertex(Vector2 vertex) {
             return start == vertex ? end : start;
         }
-        
-        
+
     }
     
     public class Polygon
@@ -194,8 +193,7 @@ namespace GeometryUtils
             
             return neighbours.Where(n =>
                 n.pos.x >= 0 && n.pos.x < map.GetLength(0) &&
-                n.pos.y >= 0 && n.pos.y < map.GetLength(1) &&
-                !map[(int) n.pos.x, (int) n.pos.y]).ToList();
+                n.pos.y >= 0 && n.pos.y < map.GetLength(1)).ToList();
         }
 
         public bool HasRoomNextToIt() {
