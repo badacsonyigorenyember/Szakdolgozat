@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using GeometryUtils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -73,7 +72,7 @@ public class Room
             }
         }
         
-        sidePositions = new Vector2[4]
+        sidePositions = new Vector2[]
         {
             new (position.x + width, center.y + Random.Range(-(height / 4), height / 4)),
             new (center.x + Random.Range(-(width / 4), width / 4), position.y + height),
@@ -84,7 +83,7 @@ public class Room
     }
 
     public List<Vector2> DoorsLocations() {
-        return sidePositions.Where((p, i) => usedSidePositions[i]).ToList();
+        return sidePositions.Where((_, i) => usedSidePositions[i]).ToList();
     }
 
     public (Vector2, Vector2) SelectEndPoints(Room other) {

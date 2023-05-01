@@ -5,24 +5,29 @@ public class GenerationUtils : MonoBehaviour
 {
     private static Dictionary<string, GameObject> prefabs;
     private static List<Room> availableRooms;
-    private static List<Room> tasks;
+    private static Room playerRoom;
+    private Room endRoom;
 
-    public static void CreateGameMechanic(List<Room> rooms, Room playerRoom, Room endRoom) {
+
+    public static bool CreateGameMechanic(List<Room> rooms) {
         LoadPrefabs();
         availableRooms = rooms;
-        tasks = new List<Room>();
 
-        playerRoom = PlacePlayer();
+        if (!PlacePlayer())
+            return false;
         
         //tutorial
         SetDoorsToLever(GenerateLever(playerRoom), GenerateDoors(playerRoom));
         
         // 1 task
-        GenerateEndRoom();
-        
+        if(!GenerateEndRoom())
+            return false;
+
+        return true;
+
     }
 
-    public static void LoadPrefabs() {
+    public static bool LoadPrefabs() {
         prefabs = new Dictionary<string, GameObject>();
 
         GameObject[] loads = Resources.LoadAll<GameObject>("Prefabs");
@@ -30,10 +35,19 @@ public class GenerationUtils : MonoBehaviour
         foreach (var prefab in loads) {
             prefabs.Add(prefab.name, prefab);
         }
+
+        if (prefabs.Count == 0)
+            return false;
+
+        return true;
     }
     
-    static Room PlacePlayer() {
-        Debug.LogError(availableRooms.Count);
+    static bool PlacePlayer() {
+        if (availableRooms.Count == 0) {
+            Debug.LogError("No rooms available to generate lever");
+            return false;
+        }
+        
         Room room = availableRooms[Random.Range(0, availableRooms.Count)];
         availableRooms.Remove(room);
 
@@ -41,8 +55,12 @@ public class GenerationUtils : MonoBehaviour
             GameManager.player = Instantiate(playerObj, new Vector3(room.center.x, 0, room.center.y), Quaternion.identity).transform;
             GameManager.player.name = "Player";
         }
-        
-        return room;
+        else {
+            return false;
+        }
+
+            playerRoom = room;
+        return true;
     }
     
     static GameObject GenerateLever(Room room = null) {
@@ -54,8 +72,6 @@ public class GenerationUtils : MonoBehaviour
         room = room ?? availableRooms[Random.Range(0, availableRooms.Count)];
         //availableRooms.Remove(room);
         
-        tasks.Add(room);
-
         List<Vector2> wallPositions = room.GetWallPositions();
         Vector2 leverPos = wallPositions[Random.Range(0, wallPositions.Count)];
         
@@ -70,6 +86,7 @@ public class GenerationUtils : MonoBehaviour
                 leverRotation = Quaternion.Euler(0,directionToCenter.y > 0 ? 180 : 0,0);
             
             lever = Instantiate(leverPrefab, new Vector3(leverPos.x, 1, leverPos.y), leverRotation);
+            lever.tag = "Map";
         }
         else 
             Debug.LogError("Lever prefab not found");
@@ -95,6 +112,8 @@ public class GenerationUtils : MonoBehaviour
                 return null;
             }
         }
+        
+        doors.ForEach(d => d.tag = "Map");
 
         return doors;
     }
@@ -105,23 +124,28 @@ public class GenerationUtils : MonoBehaviour
 
     }
     
-    static void GenerateEndRoom() {
+    static bool GenerateEndRoom() {
         if (availableRooms.Count == 0) {
             Debug.LogError("No rooms available to generate lever");
-            return;
+            return false;
         }
+
+        Room room = DFS.FindNotArticularPoint(availableRooms);
+        if (room == null) 
+            return false;
         
-        Room room = availableRooms[Random.Range(0, availableRooms.Count)];
         availableRooms.Remove(room);
         
         SetDoorsToLever(GenerateLever(), GenerateDoors(room));
 
         if (prefabs.TryGetValue("End", out GameObject leverPrefab)) {
-            Instantiate(leverPrefab, new Vector3(room.center.x, 1, room.center.y), Quaternion.identity);
+            Instantiate(leverPrefab, new Vector3(room.center.x, 1, room.center.y), Quaternion.identity).tag = "Map";
         } else {
             Debug.LogError("End prefab not found");
         }
 
+        return true; 
+        
         //endRoom = room;
     }
 }

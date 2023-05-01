@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6252118892006369271}
   m_Layer: 20
   m_Name: Lever
-  m_TagString: Untagged
+  m_TagString: Map
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

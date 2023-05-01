@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using GeometryUtils;
-using Unity.IO.LowLevel.Unsafe;
 
 public static class Delaunay
 {
@@ -103,9 +102,7 @@ public static class Delaunay
             visitedVerticies.Add(visitedVerticies.Contains(minimalEdge.start) ? minimalEdge.end : minimalEdge.start); //add the next vertex to the visited list.
         }
 
-        foreach (var edge in mst) {
-            //Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, .1f, edge.end.y), Color.magenta);
-        }
+        //foreach (var edge in mst) { Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, .1f, edge.end.y), Color.magenta); }
 
         return mst;
     }
@@ -146,9 +143,7 @@ public static class Delaunay
 
         }
         
-        foreach (var edge in finalPaths) {
-            //Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0.1f, edge.end.y), Color.magenta);
-        }
+        //foreach (var edge in finalPaths) { Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0.1f, edge.end.y), Color.magenta); }
 
         return finalPaths;
     }
@@ -252,7 +247,6 @@ public static class Delaunay
             }
         }
 
-        // Step 3: no path found
         return false;
     }
     

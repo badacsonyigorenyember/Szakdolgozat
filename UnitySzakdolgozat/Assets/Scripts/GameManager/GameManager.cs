@@ -1,8 +1,7 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using GeometryUtils;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -21,16 +20,11 @@ public class GameManager : MonoBehaviour
 
     public static Transform player;
     
-    private Room playerRoom;
-    private Room endRoom;
-
-
-
 
     private void Start() {
         instance = this;
         
-        GameStart();
+        GenerateMap();
         
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -38,11 +32,33 @@ public class GameManager : MonoBehaviour
         
     }
 
-    void GameStart() {
+    private void GenerateMap() {
         MapGeneration.GenerateMap(roomCount, mapSize, maxRoomSize);
-        GenerationUtils.CreateGameMechanic(availableRooms, playerRoom, endRoom);
+        GenerationUtils.CreateGameMechanic(availableRooms);
+    }
+
+    IEnumerator NextLevelRoutine() {
+        yield return new WaitForSeconds(5);
+        roomCount++;
+        ClearObjects(new string[] {"Map", "Player"});
+        GenerateMap();
     }
     
+    
+
+    public void NextLevel() {
+        StartCoroutine(NextLevelRoutine());
+    }
+
+    void ClearObjects(String[] toDestroyTags) {
+        foreach (var t in toDestroyTags) {
+            var objectsWithTag = GameObject.FindGameObjectsWithTag(t);
+            foreach (var obj in objectsWithTag) {
+                Destroy(obj);
+            }
+        }
+    }
+
     public void Pause() {
             gameUI.gameObject.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
@@ -58,6 +74,6 @@ public class GameManager : MonoBehaviour
     }
 
     public static void EndGame() {
-        Application.Quit();
+        instance.GenerateMap();
     }
 }

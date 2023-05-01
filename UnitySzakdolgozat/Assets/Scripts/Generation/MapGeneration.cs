@@ -45,7 +45,9 @@ public class MapGeneration : MonoBehaviour
 
         GameObject o = new GameObject()
         {
-            transform = { position = new Vector3(mapSize, 0, mapSize) }
+            transform = { position = new Vector3(mapSize, 0, mapSize) },
+            name = "Rooms",
+            tag = "Map"
         };
         o.AddComponent<MeshFilter>().mesh = mesh;
         o.AddComponent<MeshCollider>().sharedMesh = mesh;
@@ -83,13 +85,14 @@ public class MapGeneration : MonoBehaviour
                 triangles = triangles.ToArray()
             };
             mesh.RecalculateNormals();
-            GameObject g = new GameObject()
+            GameObject o = new GameObject()
             {
-                name = "Rooms"
+                name = "Corridors",
+                tag = "Map"
             };
-            g.AddComponent<MeshFilter>().mesh = mesh;
-            g.AddComponent<MeshCollider>().sharedMesh = mesh;
-            g.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));
+            o.AddComponent<MeshFilter>().mesh = mesh;
+            o.AddComponent<MeshCollider>().sharedMesh = mesh;
+            o.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));
 
     }
 
@@ -162,7 +165,11 @@ public class MapGeneration : MonoBehaviour
             triangles = triangles.ToArray()
         };
         mesh.RecalculateNormals();
-        GameObject g = new GameObject();
+        GameObject g = new GameObject()
+        {
+            name = "Walls",
+            tag = "Map"
+        };
         g.AddComponent<MeshFilter>().mesh = mesh;
         g.AddComponent<MeshCollider>().sharedMesh = mesh;
         g.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));

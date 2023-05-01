@@ -1259,7 +1259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46ac012b822fc4f9ab224ad71ca23716, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomCount: 5
+  roomCount: 4
   mapSize: 30
   maxRoomSize: 20
   gameUI: {fileID: 1413721043}
