@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GeometryUtils;
 using UnityEngine;
+using Utils;
 
 public class MapGeneration : MonoBehaviour
 {
@@ -9,31 +10,48 @@ public class MapGeneration : MonoBehaviour
         GameManager.rooms = RoomGeneration.CreateRooms(roomCount, mapSize, maxRoomSize);
         List<Room> rooms = GameManager.rooms;
         GameManager.availableRooms = rooms;
-        GameManager.map = new bool[(mapSize + maxRoomSize) * 2 + 1, (mapSize + maxRoomSize) * 2 + 1];
+        GameManager.map = new Map((mapSize + maxRoomSize) * 2 + 1);
         rooms.ForEach(r => r.ClaimArea(GameManager.map));
         
         List<Edge> edges = Delaunay.FinalEdges(rooms);
 
         Delaunay.PathFinding(edges, rooms, GameManager.map);
-        GenerateWalls(GameManager.map, 3);
+        GenerateWalls(3, GameManager.map);
+
+        BakeNavMesh();
     }
     
     public static void GenerateRooms(List<Room> rooms, int mapSize) {
         List<Vector3> verticies = new List<Vector3>();
         List<int> triangles = new List<int>();
             
-        foreach (var room in rooms) { 
-            Vector3 bottomLeft = new Vector3(room.Position.x - .5f, 0, room.Position.y - .5f);
-            Vector3 topLeft = new Vector3(room.Position.x - .5f, 0, room.Position.y + room.height + .5f);
-            Vector3 bottomRigth = new Vector3(room.Position.x + room.width + .5f, 0, room.Position.y - .5f);
-            Vector3 topRight = new Vector3(room.Position.x + room.width + .5f, 0, room.Position.y + room.height + .5f);
-    
+        foreach (var room in rooms) {
+            Vector2 pos = room.area.position;
+            Vector3 bottomLeft = new Vector3(pos.x - .5f, 0, pos.y - .5f);
+            Vector3 topLeft = new Vector3(pos.x - .5f, 0, pos.y + room.area.height + .5f);
+            Vector3 bottomRigth = new Vector3(pos.x + room.area.width + .5f, 0, pos.y - .5f);
+            Vector3 topRight = new Vector3(pos.x + room.area.width + .5f, 0, pos.y + room.area.height + .5f);
+            
             Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
+
             for (int i = 0; i < 6; i++) {
                 verticies.Add(v[i]);
                 triangles.Add(triangles.Count);
             }
-                
+            
+            //ceiling
+            Vector3 ceilingBottomLeft = new Vector3(pos.x - .5f, 3, pos.y - .5f);
+            Vector3 ceilingTopLeft = new Vector3(pos.x - .5f, 3, pos.y + room.area.height + .5f);
+            Vector3 ceilingBottomRigth = new Vector3(pos.x + room.area.width + .5f, 3, pos.y - .5f);
+            Vector3 ceilingTopRight = new Vector3(pos.x + room.area.width + .5f, 3, pos.y + room.area.height + .5f);
+
+            v = new[] {ceilingBottomLeft, ceilingTopRight, ceilingTopLeft, ceilingBottomLeft, ceilingBottomRigth, ceilingTopRight};
+
+            for (int i = 0; i < 6; i++) {
+                verticies.Add(v[i]);
+                triangles.Add(triangles.Count);
+            }
+            
         }
 
         Mesh mesh = new Mesh()
@@ -49,26 +67,40 @@ public class MapGeneration : MonoBehaviour
             name = "Rooms",
             tag = "Map"
         };
+
         o.AddComponent<MeshFilter>().mesh = mesh;
         o.AddComponent<MeshCollider>().sharedMesh = mesh;
         o.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));
         o.layer = LayerMask.NameToLayer("Ground");
     }
     
-    public static void GenerateCorridors(bool[,] map) {
+    public static void GenerateCorridors(Map map) {
             List<Vector3> verticies = new List<Vector3>();
             List<int> triangles = new List<int>();
 
-            for (int x = 0; x < map.GetLength(0); x++) {
-                for (int y = 0; y < map.GetLength(1); y++) {
-                    if (map[x, y]) {
-                        GameManager.map[x, y] = true;
+            for (int x = 0; x < map.Size; x++) {
+                for (int y = 0; y < map.Size; y++) {
+                    if (map[x, y] == FieldType.Corridor) {
+                        GameManager.map[x, y] = FieldType.Corridor;
                         Vector3 bottomLeft = new Vector3(x - .5f, 0, y - .5f);
                         Vector3 topLeft = new Vector3(x - .5f, 0, y + .5f);
                         Vector3 bottomRigth = new Vector3(x + .5f, 0, y - .5f);
                         Vector3 topRight = new Vector3(x + .5f, 0, y + .5f);
     
                         Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
+                        
+                        for (int j = 0; j < 6; j++) {
+                            verticies.Add(v[j]);
+                            triangles.Add(triangles.Count);
+                        }
+                        
+                        Vector3 ceilingBottomLeft = new Vector3(x - .5f, 3, y - .5f);
+                        Vector3 ceilingTopLeft = new Vector3(x - .5f, 3, y + .5f);
+                        Vector3 ceilingBottomRigth = new Vector3(x + .5f, 3, y - .5f);
+                        Vector3 ceilingTopRight = new Vector3(x + .5f, 3, y + .5f);
+    
+                        v = new[] {ceilingBottomLeft, ceilingTopRight, ceilingTopLeft, ceilingBottomLeft, ceilingBottomRigth, ceilingTopRight};
+                        
                         for (int j = 0; j < 6; j++) {
                             verticies.Add(v[j]);
                             triangles.Add(triangles.Count);
@@ -96,14 +128,14 @@ public class MapGeneration : MonoBehaviour
 
     }
 
-    public static void GenerateWalls(bool[,] map, int wallHeight) {
+    public static void GenerateWalls(int wallHeight, Map map) {
         List<Vector3> verticies = new List<Vector3>();
         List<int> triangles = new List<int>();
 
-        for(int x = 0; x < map.GetLength(0); x++ ){
-            for (int y = 0; y < map.GetLength(1); y++) {
-                if (map[x, y]) {
-                    if (x > 0 && !map[x - 1, y]) { //left
+        for(int x = 0; x < map.Size; x++ ){
+            for (int y = 0; y < map.Size; y++) {
+                if (map[x, y] != FieldType.Null) {
+                    if (x > 0 && map[x - 1, y] == FieldType.Null) { //left
                         Vector3 bottomLeft = new Vector3(x - .5f, 0, y - .5f);
                         Vector3 topLeft = new Vector3(x - .5f, wallHeight, y - .5f);
                         Vector3 bottomRigth = new Vector3(x - .5f, 0, y + .5f);
@@ -116,7 +148,7 @@ public class MapGeneration : MonoBehaviour
                         }
                     }
 
-                    if (x < map.GetLength(0) - 1 && !map[x + 1, y]) { //right
+                    if (x < map.Size - 1 && map[x + 1, y] == FieldType.Null) { //right
                         Vector3 bottomLeft = new Vector3(x + .5f, 0, y + .5f);
                         Vector3 topLeft = new Vector3(x + .5f, wallHeight, y + .5f);
                         Vector3 bottomRigth = new Vector3(x + .5f, 0, y - .5f);
@@ -129,7 +161,7 @@ public class MapGeneration : MonoBehaviour
                         }
                     }
 
-                    if (y > 0 && !map[x, y - 1]) { //down
+                    if (y > 0 && map[x, y - 1] == FieldType.Null) { //down
                         Vector3 bottomLeft = new Vector3(x + .5f, 0, y - .5f);
                         Vector3 topLeft = new Vector3(x + .5f, wallHeight, y - .5f);
                         Vector3 bottomRigth = new Vector3(x - .5f, 0, y - .5f);
@@ -142,7 +174,7 @@ public class MapGeneration : MonoBehaviour
                         }
                     }
 
-                    if (y < map.GetLength(1) - 1 && !map[x, y + 1]) { //up
+                    if (y < map.Size - 1 && map[x, y + 1] == FieldType.Null) { //up
                         Vector3 bottomLeft = new Vector3(x - .5f, 0, y + .5f);
                         Vector3 topLeft = new Vector3(x - .5f, wallHeight, y + .5f);
                         Vector3 bottomRigth = new Vector3(x + .5f, 0, y + .5f);
@@ -173,6 +205,13 @@ public class MapGeneration : MonoBehaviour
         g.AddComponent<MeshFilter>().mesh = mesh;
         g.AddComponent<MeshCollider>().sharedMesh = mesh;
         g.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));
+        //g.AddComponent<NavMeshSurface>();
+        //g.AddComponent<NavMeshSurface>().layerMask = LayerMask.GetMask("Ground");
+        //g.AddComponent<NavMeshSurface>().BuildNavMesh();
+    }
+
+    private static void BakeNavMesh() {
+        
     }
 }
 

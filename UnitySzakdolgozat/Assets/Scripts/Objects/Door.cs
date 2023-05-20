@@ -1,18 +1,27 @@
-using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Door : MonoBehaviour
 {
     private Vector3 startPos;
     private int duration = 5;
-    
+
+    public List<Task> tasks;
+
     private void Start() {
         startPos = transform.position;
+        
     }
 
     public void Action() {
+        foreach (var task in tasks) {
+            if (!task.Activated) {
+                return;
+            }
+        }
         StartCoroutine(RaiseDoor());
+        
     }
 
     private IEnumerator RaiseDoor() {

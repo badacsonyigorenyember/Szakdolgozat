@@ -1,14 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Lever : MonoBehaviour, InteractableObject
+public class Lever : MonoBehaviour, Task, InteractableObject
 {
-    public List<GameObject> doors;
+    public List<Door> doors;
 
+    public bool Activated { get; set; }
+
+    public bool IsStationary { get; set; } = true;
+    
     public void Action() {
-        foreach (var door in doors) {
-            door.TryGetComponent(out Door doorComponent);
-            doorComponent.Action();
-        }
+        Debug.LogError(doors[0].tasks.Count);
+        Activated = true;
+        Debug.Log(name + " activated");
+        doors.ForEach(d => d.Action());
     }
+
+    
 }

@@ -16,9 +16,11 @@ public class GameManager : MonoBehaviour
 
     public Canvas gameUI;
     
-    public static bool[,] map;
+    public static Map map;
 
-    public static Transform player;
+    public static PlayerController player;
+
+    public int taskCount;
     
 
     private void Start() {
@@ -34,12 +36,14 @@ public class GameManager : MonoBehaviour
 
     private void GenerateMap() {
         MapGeneration.GenerateMap(roomCount, mapSize, maxRoomSize);
-        GenerationUtils.CreateGameMechanic(availableRooms);
+        LogicGeneration.CreateGameMechanic(availableRooms, taskCount);
     }
 
     IEnumerator NextLevelRoutine() {
         yield return new WaitForSeconds(5);
         roomCount++;
+        taskCount++;
+        
         ClearObjects(new string[] {"Map", "Player"});
         GenerateMap();
     }
@@ -63,17 +67,17 @@ public class GameManager : MonoBehaviour
             gameUI.gameObject.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            player.Find("FirstPersonCamera").GetComponent<PlayerLooking>().enabled = false;
+            player.CanLook(false);
     }
     
     public void Resume() {
         gameUI.gameObject.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        player.Find("FirstPersonCamera").GetComponent<PlayerLooking>().enabled = true;
+        player.CanLook(true);
     }
 
     public static void EndGame() {
-        instance.GenerateMap();
+        Application.Quit();
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Utils;
 
 namespace GeometryUtils
 
@@ -181,8 +182,7 @@ namespace GeometryUtils
             h = 0;
         }
 
-        public List<Node> GetNeighbours(bool[,] map, Vector2 goal) {
-
+        public List<Node> GetNeighbours(int mapSize) {
             List<Node> neighbours = new List<Node>()
             {
                 new(new Vector2(this.pos.x - 1, this.pos.y), this),
@@ -192,17 +192,17 @@ namespace GeometryUtils
             };
             
             return neighbours.Where(n =>
-                n.pos.x >= 0 && n.pos.x < map.GetLength(0) &&
-                n.pos.y >= 0 && n.pos.y < map.GetLength(1)).ToList();
+                n.pos.x >= 0 && n.pos.x < mapSize &&
+                n.pos.y >= 0 && n.pos.y < mapSize).ToList();
         }
 
-        public bool HasRoomNextToIt() {
+        public bool HasRoomNextToIt(int mapSize) {
             for(int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     Vector2 position = this.pos + new Vector2(x, y);
-                    if(position.x >= 0 && position.x < GameManager.map.GetLength(0) && 
-                       position.y >= 0 && position.y < GameManager.map.GetLength(1))
-                        if (GameManager.map[(int) position.x, (int) position.y])
+                    if(position.x >= 0 && position.x < mapSize && 
+                       position.y >= 0 && position.y < mapSize)
+                        if (GameManager.map[position.x, position.y] == FieldType.Room)
                             return true;
                 }
                 

@@ -9,6 +9,7 @@ public class RoomGeneration
         List<Room> rooms = new List<Room>();
         int attempts = 0;
         int actualRooms = 0;
+        //TODO itt a baj
         while (actualRooms < roomCount) {
             if (attempts == 5000) {
                 mapSize += mapSize / 2;
@@ -31,10 +32,12 @@ public class RoomGeneration
 
         //todo switch these two
         
+        Debug.Log(mapSize + " mapSize");
+        
         foreach (var room in rooms) {
-            room.Position += new Vector2(mapSize, mapSize);
+            room.area.setPosition(room.area.position + new Vector2(mapSize, mapSize));
         }
-
+        
         return rooms;
 
     }
