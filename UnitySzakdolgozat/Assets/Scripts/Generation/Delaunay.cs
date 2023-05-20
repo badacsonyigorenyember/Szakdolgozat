@@ -207,8 +207,7 @@ public static class Delaunay
             }
         }
         Debug.Log(count + " count");
-
-        MapGeneration.GenerateCorridors(map);
+        
     }
 
     private static void RetracePath(Node end, Map map) {

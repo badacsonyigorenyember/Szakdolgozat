@@ -27,15 +27,12 @@ public class RoomGeneration
                 attempts++;
 
         }
-            
-        MapGeneration.GenerateRooms(rooms, mapSize);
-
-        //todo switch these two
         
         Debug.Log(mapSize + " mapSize");
         
         foreach (var room in rooms) {
             room.area.setPosition(room.area.position + new Vector2(mapSize, mapSize));
+
         }
         
         return rooms;

@@ -7,11 +7,12 @@ public class Door : MonoBehaviour
     private Vector3 startPos;
     private int duration = 5;
 
+    public Room lockedRoom;
+
     public List<Task> tasks;
 
     private void Start() {
         startPos = transform.position;
-        
     }
 
     public void Action() {
@@ -20,6 +21,9 @@ public class Door : MonoBehaviour
                 return;
             }
         }
+
+        lockedRoom.locked = false;
+        
         StartCoroutine(RaiseDoor());
         
     }

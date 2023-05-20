@@ -49,4 +49,8 @@ public class Rect
 
         return false;
     }
+
+    public Vector3 Center() {
+        return new Vector3(center.x, 0, center.y);
+    }
 }

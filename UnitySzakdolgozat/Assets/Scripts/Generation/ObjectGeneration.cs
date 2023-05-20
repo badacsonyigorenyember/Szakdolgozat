@@ -69,6 +69,8 @@ public class ObjectGeneration : MonoBehaviour
             Vector2 pos = room.area.center;
             Transform enemy = Instantiate(enemyObj, new Vector3(pos.x, 0, pos.y), Quaternion.identity).transform;
             enemy.name = "Enemy";
+            enemy.GetComponent<Enemy>().SetActualRoom(room);
+            
         }
     }
     
@@ -170,7 +172,8 @@ public class ObjectGeneration : MonoBehaviour
                 Door door = doorObj.GetComponent<Door>();
                 door.tasks = new List<Task>();
                 room.doors.Add(door);
-                
+                door.lockedRoom = room;
+
             } else {
                 Debug.LogError("Door prefab not found");
                 return null;

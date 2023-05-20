@@ -221,6 +221,4 @@ namespace GeometryUtils
         
     }
 
-    
-    
 }

@@ -7,27 +7,25 @@ using UnityEngine.AI;
 public class Enemy :MonoBehaviour
 {
     public Room actualRoom;
+    public Room previousRoom;
     public GameObject target;
 
     private List<Vector3> patrolPoints;
+    private Vector3 destination;
 
     public float waitTime;
     private Coroutine waiting;
     private bool isMoving = false;
-    private bool isWaiting;
+    private bool isWaiting = false;
     
     private NavMeshAgent agent;
     
 
     void Start() {
         agent = transform.GetComponent<NavMeshAgent>();
-        patrolPoints = new List<Vector3>()
-        {
-            new (10, 0, 10),
-            new (20, 0, 20),
-            new (-10, 0, 10)
-        };
+        patrolPoints = new List<Vector3>();
         SelectPatrolPoints();
+        previousRoom = null;
     }
 
     public void SetActualRoom(Room room) {
@@ -36,24 +34,21 @@ public class Enemy :MonoBehaviour
 
     private void Update() {
         Patrol();
-
-        if (Input.GetKeyDown(KeyCode.A)) {
-            Debug.Log(waiting);
-        }
     }
 
     void Patrol() {
         if (patrolPoints.Count > 0) {
             if (!isMoving) {
-                isMoving = true;
-                agent.SetDestination(patrolPoints.Last());
-                
+                Move(patrolPoints.Last());
             }
             else {
                 if (InStoppingRange() && !isWaiting) {
                     waiting = StartCoroutine(Waiting());
                 }
             }
+        }
+        else {
+            MoveToAnotherRoom();
         }
         
     }
@@ -68,11 +63,10 @@ public class Enemy :MonoBehaviour
     }
 
     bool InStoppingRange() {
-        return Vector2.Distance(transform.position, patrolPoints.Last()) < agent.stoppingDistance;
+        return Vector3.Distance(transform.position, destination) < agent.stoppingDistance;
     }
 
-    void StopWaiting() {
-        Debug.Log("Stopped");
+    void StopWaiting() { 
         StopCoroutine(waiting);
         waiting = null;
     }
@@ -83,13 +77,39 @@ public class Enemy :MonoBehaviour
         while (patrolPoints.Count <= patrolPointNumber) {
             Vector2 point = actualRoom.GetRandPositionInRoom();
             
-            if (patrolPoints.Any(p => Vector2.Distance(p, point) < 2f)) 
+            if (patrolPoints.Any(p => Vector3.Distance(p, new Vector3(point.x, 0, point.y)) < 2f)) {
                 point = actualRoom.GetRandPositionInRoom();
+            }
             
             
             patrolPoints.Add(new(point.x, 0, point.y));
         }
+        Debug.Log(patrolPointNumber + " patrolpoints");
     }
 
+    void Move(Vector3 position) {
+        Debug.Log(position);
+        agent.SetDestination(position);
+        isMoving = true;
+        destination = position;
+    }
+    
+    void MoveToAnotherRoom() {
+        Room newRoom = actualRoom.neighbours.FirstOrDefault(r => !r.locked && r != previousRoom);
+        
+        if (newRoom != null) {
+            previousRoom = actualRoom;
+            actualRoom = newRoom;
+            Vector3 newRoomPosition = new Vector3(newRoom.area.center.x, 0, newRoom.area.center.y);
+            Move(newRoomPosition);
+            SelectPatrolPoints();
+            patrolPoints.Add(newRoomPosition);
+        }
+        else {
+            SelectPatrolPoints();
+            previousRoom = null;
+        }
+        
+    }
     
 }
