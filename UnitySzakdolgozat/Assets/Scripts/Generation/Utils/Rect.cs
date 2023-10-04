@@ -26,10 +26,10 @@ public class Rect
     public void setPosition(Vector2 pos) {
         this.position = pos;
         this.center = new Vector2((int) (position.x + width / 2), (int) (position.y + height / 2));
-        xMin = (int) pos.x;
-        xMax = (int) pos.x + width;
-        yMin = (int) pos.y;
-        yMax = (int) pos.y + height;
+        this.xMin = (int) pos.x;
+        this.xMax = (int) pos.x + width;
+        this.yMin = (int) pos.y;
+        this.yMax = (int) pos.y + height;
     }
 
     public bool Overlaps(Rect other) {

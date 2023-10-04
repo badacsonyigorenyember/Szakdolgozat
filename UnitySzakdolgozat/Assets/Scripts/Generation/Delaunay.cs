@@ -52,15 +52,7 @@ public static class Delaunay
             if(triangulation[i].ContainsPoint(superTriangle.a)| triangulation[i].ContainsPoint(superTriangle.b) ||
                triangulation[i].ContainsPoint(superTriangle.c))
                 triangulation.Remove(triangulation[i]);
-            else {
-                /*Debug.DrawLine(new Vector3(triangulation[i].a.x, 0, triangulation[i].a.y),
-                    new Vector3(triangulation[i].b.x, 0, triangulation[i].b.y), Color.black);
-                Debug.DrawLine(new Vector3(triangulation[i].a.x, 0, triangulation[i].a.y),
-                    new Vector3(triangulation[i].c.x, 0, triangulation[i].c.y), Color.black);
-                Debug.DrawLine(new Vector3(triangulation[i].c.x, 0, triangulation[i].c.y),
-                    new Vector3(triangulation[i].b.x, 0, triangulation[i].b.y), Color.black);*/
-            }
-            
+
         }
 
         List<Edge> delaunayEdges = new List<Edge>();
@@ -103,7 +95,6 @@ public static class Delaunay
             visitedVerticies.Add(visitedVerticies.Contains(minimalEdge.start) ? minimalEdge.end : minimalEdge.start); //add the next vertex to the visited list.
         }
 
-        //foreach (var edge in mst) { Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, .1f, edge.end.y), Color.magenta); }
 
         return mst;
     }
@@ -143,8 +134,6 @@ public static class Delaunay
 
         }
         
-        //foreach (var edge in finalPaths) { Debug.DrawLine(new Vector3(edge.start.x, 0, edge.start.y), new Vector3(edge.end.x, 0.1f, edge.end.y), Color.magenta); }
-
         return finalPaths;
     }
 
@@ -206,7 +195,6 @@ public static class Delaunay
                 closed.Add(current);
             }
         }
-        Debug.Log(count + " count");
         
     }
 
@@ -238,7 +226,6 @@ public static class Delaunay
             }
             
             foreach (var neighbor in current.neighbours) {
-                Debug.Log("neighbour pos: " + neighbor.area.center);
                 if (!visited.Contains(neighbor) && !neighbor.locked) {
                     rooms.Enqueue(neighbor);
                     visited.Add(neighbor);

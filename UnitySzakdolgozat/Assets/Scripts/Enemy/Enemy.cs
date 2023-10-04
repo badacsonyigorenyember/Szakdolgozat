@@ -15,8 +15,8 @@ public class Enemy :MonoBehaviour
 
     public float waitTime;
     private Coroutine waiting;
-    private bool isMoving = false;
-    private bool isWaiting = false;
+    private bool isMoving;
+    private bool isWaiting;
     
     private NavMeshAgent agent;
     
@@ -84,11 +84,9 @@ public class Enemy :MonoBehaviour
             
             patrolPoints.Add(new(point.x, 0, point.y));
         }
-        Debug.Log(patrolPointNumber + " patrolpoints");
     }
 
     void Move(Vector3 position) {
-        Debug.Log(position);
         agent.SetDestination(position);
         isMoving = true;
         destination = position;

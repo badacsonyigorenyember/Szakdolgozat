@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using Utils;
 using Random = UnityEngine.Random;
@@ -19,7 +18,7 @@ public class Room
 
 
     public Room(int mapSize, int maxSize) {
-        int distance = Random.Range(0, mapSize);
+        int distance = Random.Range(0, mapSize - maxSize - 1);
         float angle = Random.Range(0, 2 * Mathf.PI);
 
         Vector2 areaPos = new Vector2((int) (distance * Mathf.Cos(angle)), (int) (distance * Mathf.Sin(angle)));

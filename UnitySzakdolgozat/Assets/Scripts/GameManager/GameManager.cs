@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
         roomCount++;
         taskCount++;
         
-        ClearObjects(new string[] {"Map", "Player"});
+        ClearObjects(new [] {"Map", "Player"});
         GenerateMap();
     }
     

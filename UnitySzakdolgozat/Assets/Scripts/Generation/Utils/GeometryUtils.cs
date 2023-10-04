@@ -48,15 +48,13 @@ namespace GeometryUtils
         }
 
         public bool Equals(Triangle t) {
-            if (t == null) return false;
-            if (a == t.a && b == t.b && c == t.c ||
-                a == t.a && b == t.c && c == t.b ||
-                a == t.b && b == t.a && c == t.c ||
-                a == t.b && b == t.c && c == t.a ||
-                a == t.c && b == t.a && c == t.b ||
-                a == t.c && b == t.b && c == t.a) 
-                return true;
-            return false;
+            return t != null && 
+                   (a == t.a && b == t.b && c == t.c ||
+                   a == t.a && b == t.c && c == t.b ||
+                   a == t.b && b == t.a && c == t.c ||
+                   a == t.b && b == t.c && c == t.a ||
+                   a == t.c && b == t.a && c == t.b ||
+                   a == t.c && b == t.b && c == t.a);
 
         }
 
