@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerLooking : MonoBehaviour
 {
-    private float sensitivity;
+    public float sensitivity;
     public Transform player;
     private float xRotation;
     public bool canLook;
@@ -14,11 +14,8 @@ public class PlayerLooking : MonoBehaviour
         canLook = true;
     }
 
-    public void SetSensitivity(float value) {
-        sensitivity = value;
-    }
-
     public void Look() {
+        sensitivity = GameManager.lookingSensitivity;
         if (canLook) {
             float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * sensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * sensitivity;

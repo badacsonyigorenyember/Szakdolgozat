@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
     public float jump = 1f;
     public float interactRange;
     public Transform groundCheck;
-
+    
     public PlayerLooking looking;
     public PlayerInteraction interaction;
     public PlayerMovement movement;
@@ -22,10 +22,6 @@ public class PlayerController : MonoBehaviour
         looking.Look();
         interaction.InteractionHandling();
         movement.Move();
-    }
-
-    public void SetMouseSensitivity(float value) {
-        looking.SetSensitivity(value);
     }
 
     public void CanLook(bool value) {

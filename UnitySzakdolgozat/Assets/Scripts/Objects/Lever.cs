@@ -10,11 +10,15 @@ public class Lever : MonoBehaviour, Task, InteractableObject
     public bool IsStationary { get; set; } = true;
     
     public void Action() {
-        Debug.LogError(doors[0].tasks.Count);
-        Activated = true;
-        Debug.Log(name + " activated");
-        doors.ForEach(d => d.Action());
+        if (!Activated) {
+            Activated = true;
+            doors.ForEach(d => d.Action());
+            GameManager gm = GameManager.instance;
+            gm.TaskCompleted();
+        }
+        
     }
+    
 
     
 }

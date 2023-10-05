@@ -19,6 +19,11 @@ public class Enemy :MonoBehaviour
     private bool isWaiting;
     
     private NavMeshAgent agent;
+
+    public Transform player;
+    public float sightRange, attackRange;
+    public bool playerInRange;
+    
     
 
     void Start() {
@@ -26,6 +31,7 @@ public class Enemy :MonoBehaviour
         patrolPoints = new List<Vector3>();
         SelectPatrolPoints();
         previousRoom = null;
+        player = GameObject.Find("Player").transform;
     }
 
     public void SetActualRoom(Room room) {
@@ -107,6 +113,10 @@ public class Enemy :MonoBehaviour
             SelectPatrolPoints();
             previousRoom = null;
         }
+        
+    }
+
+    void FollowTarget() {
         
     }
     

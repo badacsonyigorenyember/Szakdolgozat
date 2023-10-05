@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    public Transform cam;
+    private Transform cam;
     private float interactRange;
     private bool menuActive;
 

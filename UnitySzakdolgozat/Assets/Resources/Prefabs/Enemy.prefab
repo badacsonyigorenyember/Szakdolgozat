@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 72152046980733739}
   - component: {fileID: 8153905738345214429}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 7168428727462669570}
   - component: {fileID: 8833005228260070353}
   - component: {fileID: -6284456564394951815}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Enemy
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -165,6 +165,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   waitTime: 1
+  player: {fileID: 0}
+  sightRange: 0
+  attackRange: 0
+  playerInRange: 0
 --- !u!1 &7168428727534022113
 GameObject:
   m_ObjectHideFlags: 0
@@ -176,7 +180,7 @@ GameObject:
   - component: {fileID: 7168428727534022114}
   - component: {fileID: 7168428727534022116}
   - component: {fileID: 7168428727534022115}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Capsule
   m_TagString: Player
   m_Icon: {fileID: 0}

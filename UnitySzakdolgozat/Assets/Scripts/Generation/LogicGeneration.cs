@@ -22,7 +22,9 @@ public class LogicGeneration : MonoBehaviour
         // 1 task
         endRoom = ObjectGeneration.GenerateEndRoom(availableRooms);
 
-        ObjectGeneration.GenerateLevers(availableRooms, endRoom);
+        for (int i = 0; i < leverCount; i++) {
+            ObjectGeneration.GenerateLevers(availableRooms, endRoom);
+        }
         
         //ObjectGeneration.GeneratePressurePlate(availableRooms);
         

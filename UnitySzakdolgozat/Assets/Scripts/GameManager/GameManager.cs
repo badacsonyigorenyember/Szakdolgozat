@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -14,29 +15,47 @@ public class GameManager : MonoBehaviour
     public int mapSize;
     public int maxRoomSize;
 
-    public Canvas gameUI;
+    public GameObject menu;
     
     public static Map map;
 
     public static PlayerController player;
-
-    public int taskCount;
     
+    public TextMeshProUGUI taskCountText;
+    public int taskCount;
+    public static int completedTasksCount;
+
+    public TextMeshProUGUI tutorialText;
+
+    public static float lookingSensitivity = 200f;
+
+    private Enemy[] enemies;
+
 
     private void Start() {
         instance = this;
         
         GenerateMap();
+
+        Tutorial();
         
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        gameUI.gameObject.SetActive(false);
-        
+        menu.SetActive(false);
+
     }
 
     private void GenerateMap() {
         MapGeneration.GenerateMap(roomCount, mapSize, maxRoomSize);
         LogicGeneration.CreateGameMechanic(availableRooms, taskCount);
+        completedTasksCount = 0;
+        taskCountText.text = "Tasks: " + (taskCount + 2) + "/" + completedTasksCount;
+        enemies = FindObjectsOfType<Enemy>();
+    }
+
+    public void TaskCompleted() {
+        completedTasksCount++;
+        taskCountText.text = "Tasks: " + (taskCount + 2) + "/" + completedTasksCount;
     }
 
     IEnumerator NextLevelRoutine() {
@@ -45,13 +64,26 @@ public class GameManager : MonoBehaviour
         taskCount++;
         
         ClearObjects(new [] {"Map", "Player"});
+        foreach (var enemy in enemies) {
+            Destroy(enemy);
+        }
         GenerateMap();
     }
-    
-    
+
+    IEnumerator TutorialRoutine() {
+        tutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it?";
+        yield return new WaitForSeconds(10);
+        tutorialText.text = "";
+    }
+
+
 
     public void NextLevel() {
         StartCoroutine(NextLevelRoutine());
+    }
+
+    public void Tutorial() {
+        StartCoroutine(TutorialRoutine());
     }
 
     void ClearObjects(String[] toDestroyTags) {
@@ -63,15 +95,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SetSensitivity(float value) {
+        lookingSensitivity = value;
+    }
+
     public void Pause() {
-            gameUI.gameObject.SetActive(true);
+            menu.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             player.CanLook(false);
     }
     
     public void Resume() {
-        gameUI.gameObject.SetActive(false);
+        menu.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         player.CanLook(true);

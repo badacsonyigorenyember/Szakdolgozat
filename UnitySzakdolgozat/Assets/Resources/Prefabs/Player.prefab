@@ -256,7 +256,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1bd8ab13821846e19d5a566223530ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
 --- !u!114 &4402885197802522928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -424,7 +423,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 1000
-  field of view: 60
+  field of view: 45
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -462,6 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1175a59ebd84950ad75f04b92e1657f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sensitivity: 0
   player: {fileID: 7168428727462669570}
   canLook: 0
 --- !u!1 &7168428728816192045
