@@ -68,8 +68,8 @@ public class ObjectGeneration : MonoBehaviour
             Vector2 pos = room.area.center;
             Transform enemy = Instantiate(enemyObj, new Vector3(pos.x, 0, pos.y), Quaternion.identity).transform;
             enemy.name = "Enemy";
-            enemy.GetComponent<Enemy>().SetActualRoom(room);
-            
+            enemy.GetComponent<Enemy>().starterRoom = room;
+
         }
     }
     

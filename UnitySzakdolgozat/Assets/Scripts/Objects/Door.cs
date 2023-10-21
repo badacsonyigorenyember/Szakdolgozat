@@ -38,5 +38,6 @@ public class Door : MonoBehaviour
         }
 
         transform.position = targetPos;
+        MapGeneration.BuildNavMesh();
     }
 }

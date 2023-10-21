@@ -202,6 +202,7 @@ GameObject:
   - component: {fileID: 7168428727462669570}
   - component: {fileID: 8833005228260070353}
   - component: {fileID: -6284456564394951815}
+  - component: {fileID: -871052987672220102}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Player
@@ -237,10 +238,10 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.3
-  m_Speed: 3.5
+  m_Speed: 2
   m_Acceleration: 8
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 180
   m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -263,14 +264,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   patrolPoints: []
-  waitTime: 1
+  waitTime: 3
   player: {fileID: 0}
   playerInRange: 0
-  patrolPointNumber: 5
+  maxPatrolPointNumber: 10
   state: 0
   targetRange: 100
   targetAngle: 60
-  minDist: 2
+  followTime: 2
+  wasChasing: 0
+--- !u!114 &-871052987672220102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7168428727462669568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 0
+  m_Area: 0
+  m_IgnoreFromBuild: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &7168428727534022113
 GameObject:
   m_ObjectHideFlags: 0

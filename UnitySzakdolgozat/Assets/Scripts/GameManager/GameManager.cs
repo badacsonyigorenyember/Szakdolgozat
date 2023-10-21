@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     public static Map map;
 
     public static PlayerController player;
+    public static Room starterRoom;
     
     public TextMeshProUGUI taskCountText;
     public int taskCount;
@@ -29,7 +30,7 @@ public class GameManager : MonoBehaviour
 
     public static float lookingSensitivity = 200f;
 
-    private Enemy[] enemies;
+    private static Enemy[] enemies;
 
 
     private void Start() {
@@ -48,10 +49,13 @@ public class GameManager : MonoBehaviour
     private void GenerateMap() {
         MapGeneration.GenerateMap(roomCount, mapSize, maxRoomSize);
         LogicGeneration.CreateGameMechanic(availableRooms, taskCount);
+        MapGeneration.BuildNavMesh();
         completedTasksCount = 0;
         taskCountText.text = "Tasks: " + (taskCount + 2) + "/" + completedTasksCount;
         enemies = FindObjectsOfType<Enemy>();
     }
+
+    
 
     public void TaskCompleted() {
         completedTasksCount++;
@@ -76,8 +80,11 @@ public class GameManager : MonoBehaviour
         tutorialText.text = "";
     }
 
-    public void Respawn() {
-        
+    public static void Respawn() {
+        player.transform.position = new Vector3(starterRoom.area.center.x, 0, starterRoom.area.center.y);
+        foreach (var enemy in enemies) {
+            enemy.Respawn();
+        }
     }
 
     public void NextLevel() {

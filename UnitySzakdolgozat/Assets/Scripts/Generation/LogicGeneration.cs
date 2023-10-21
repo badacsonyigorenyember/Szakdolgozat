@@ -36,8 +36,7 @@ public class LogicGeneration : MonoBehaviour
     }
     
     private static bool Tutorial() {
-        
-        playerRoom = ObjectGeneration.StartRoom(availableRooms);
+        GameManager.starterRoom = ObjectGeneration.StartRoom(availableRooms);
 
         return true;
     }

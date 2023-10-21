@@ -7,6 +7,8 @@ using Utils;
 
 public class MapGeneration : MonoBehaviour
 {
+    private static NavMeshSurface floorNavMesh;
+    
     public static void GenerateMap(int roomCount, int mapSize, int maxRoomSize) {
         float time = Time.realtimeSinceStartup;
         List<Room> rooms;
@@ -26,8 +28,14 @@ public class MapGeneration : MonoBehaviour
 
         GameManager.rooms = rooms;
         Debug.Log("minden után: " + (Time.realtimeSinceStartup - time));
-
+        
     }
+
+    public static void BuildNavMesh() {
+        floorNavMesh.BuildNavMesh();
+    }
+
+    
 
     public static void GenerateFloor(Map map, GameObject go) {
         GameObject floorPrefab = Resources.Load<GameObject>("Prefabs/Floor");
@@ -87,145 +95,16 @@ public class MapGeneration : MonoBehaviour
         floor.AddComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/Floor", typeof(Material));
         
         floor.AddComponent<NavMeshSurface>();
-        floor.GetComponent<NavMeshSurface>().layerMask = LayerMask.GetMask("Ground");
-        floor.GetComponent<NavMeshSurface>().BuildNavMesh();
+
+        floorNavMesh = floor.GetComponent<NavMeshSurface>();
+        
+        
         
         ceiling.AddComponent<MeshFilter>().mesh = ceilingMesh;
         ceiling.AddComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/Ceiling", typeof(Material));
 
     }
     
-    
-    public static void GenerateFloor(List<Room> rooms, int mapSize) {
-        List<Vector3> verticies = new List<Vector3>();
-        List<int> triangles = new List<int>();
-            
-        foreach (var room in rooms) {
-            Vector2 pos = room.area.position;
-            Vector3 bottomLeft = new Vector3(pos.x - .5f, 0, pos.y - .5f);
-            Vector3 topLeft = new Vector3(pos.x - .5f, 0, pos.y + room.area.height + .5f);
-            Vector3 bottomRigth = new Vector3(pos.x + room.area.width + .5f, 0, pos.y - .5f);
-            Vector3 topRight = new Vector3(pos.x + room.area.width + .5f, 0, pos.y + room.area.height + .5f);
-            
-            Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-
-            for (int i = 0; i < 6; i++) {
-                verticies.Add(v[i]);
-                triangles.Add(triangles.Count);
-            }
-            
-            //ceiling
-            Vector3 ceilingBottomLeft = new Vector3(pos.x - .5f, 3, pos.y - .5f);
-            Vector3 ceilingTopLeft = new Vector3(pos.x - .5f, 3, pos.y + room.area.height + .5f);
-            Vector3 ceilingBottomRigth = new Vector3(pos.x + room.area.width + .5f, 3, pos.y - .5f);
-            Vector3 ceilingTopRight = new Vector3(pos.x + room.area.width + .5f, 3, pos.y + room.area.height + .5f);
-
-            v = new[] {ceilingBottomLeft, ceilingTopRight, ceilingTopLeft, ceilingBottomLeft, ceilingBottomRigth, ceilingTopRight};
-
-            for (int i = 0; i < 6; i++) {
-                verticies.Add(v[i]);
-                triangles.Add(triangles.Count);
-            }
-            
-        }
-
-        Mesh mesh = new Mesh()
-        {
-            vertices = verticies.ToArray(),
-            triangles = triangles.ToArray()
-        };
-        GameObject corridor = GenerateCorridors(GameManager.map);
-        
-
-        Mesh floor = new Mesh();
-
-        
-
-        GameObject o = new GameObject()
-        {
-            name = "Floor",
-            tag = "Map"
-        };
-
-        o.AddComponent<MeshFilter>().mesh = mesh;
-        o.layer = LayerMask.NameToLayer("Ground");
-        
-        CombineInstance[] combineInstances = new CombineInstance[2];
-        combineInstances[0].mesh = o.GetComponent<MeshFilter>().sharedMesh;
-        combineInstances[0].transform = o.transform.localToWorldMatrix;
-        combineInstances[1].mesh = corridor.GetComponent<MeshFilter>().sharedMesh;
-        combineInstances[1].transform = corridor.transform.localToWorldMatrix;
-        
-        floor.CombineMeshes(combineInstances, true, false);
-        
-        floor.RecalculateNormals();
-        floor.RecalculateTangents();
-
-        o.GetComponent<MeshFilter>().mesh = floor;
-        o.AddComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/Floor", typeof(Material));
-        o.AddComponent<MeshCollider>().sharedMesh = floor;
-        
-        
-
-        Destroy(corridor);
-        
-    }
-    
-    public static GameObject GenerateCorridors(Map map) {
-        List<Vector3> verticies = new List<Vector3>();
-        List<int> triangles = new List<int>();
-
-        for (int x = 0; x < map.Size; x++) {
-            for (int y = 0; y < map.Size; y++) {
-                if (map[x, y] == FieldType.Corridor) {
-                    GameManager.map[x, y] = FieldType.Corridor;
-                    Vector3 bottomLeft = new Vector3(x - .5f, 0, y - .5f);
-                    Vector3 topLeft = new Vector3(x - .5f, 0, y + .5f);
-                    Vector3 bottomRigth = new Vector3(x + .5f, 0, y - .5f);
-                    Vector3 topRight = new Vector3(x + .5f, 0, y + .5f);
-
-                    Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-                    
-                    for (int j = 0; j < 6; j++) {
-                        verticies.Add(v[j]);
-                        triangles.Add(triangles.Count);
-                    }
-                    
-                    Vector3 ceilingBottomLeft = new Vector3(x - .5f, 3, y - .5f);
-                    Vector3 ceilingTopLeft = new Vector3(x - .5f, 3, y + .5f);
-                    Vector3 ceilingBottomRigth = new Vector3(x + .5f, 3, y - .5f);
-                    Vector3 ceilingTopRight = new Vector3(x + .5f, 3, y + .5f);
-
-                    v = new[] {ceilingBottomLeft, ceilingTopRight, ceilingTopLeft, ceilingBottomLeft, ceilingBottomRigth, ceilingTopRight};
-                    
-                    for (int j = 0; j < 6; j++) {
-                        verticies.Add(v[j]);
-                        triangles.Add(triangles.Count);
-                    }
-                }
-                    
-            }
-        }
-            
-            
-       Mesh mesh =  new Mesh()
-        {
-            vertices = verticies.ToArray(),
-            triangles = triangles.ToArray()
-        };
-       
-        mesh.RecalculateNormals();
-        
-        GameObject o = new GameObject()
-        {
-            name = "Corridors",
-            tag = "Map"
-        };
-        
-        o.AddComponent<MeshFilter>().mesh = mesh;
-
-        return o;
-    }
 
     public static void GenerateWalls(int wallHeigh, Map map) {
         GameObject wallPrefab = Resources.Load<GameObject>("Prefabs/Wall");
