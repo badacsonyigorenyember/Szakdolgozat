@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
 
     Vector3 velocity;
     bool isGrounded;
+    public bool isMoving;
 
     public void Initialize(float s, float g, float j, Transform gc) {
         speed = s;
@@ -33,6 +34,12 @@ public class PlayerMovement : MonoBehaviour
 
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
+
+        if (x != 0 || z != 0) {
+            isMoving = true;
+        } else {
+            isMoving = false;
+        }
 
         Transform trans = transform;
         Vector3 move = trans.right * x + trans.forward * z;

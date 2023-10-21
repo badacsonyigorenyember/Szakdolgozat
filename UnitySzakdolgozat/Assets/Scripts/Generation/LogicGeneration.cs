@@ -29,6 +29,7 @@ public class LogicGeneration : MonoBehaviour
         //ObjectGeneration.GeneratePressurePlate(availableRooms);
         
         SpawnEnemy();
+       
 
         return true;
 

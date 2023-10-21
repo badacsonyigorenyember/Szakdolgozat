@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class MovableObject : MonoBehaviour, InteractableObject
@@ -7,5 +8,5 @@ public class MovableObject : MonoBehaviour, InteractableObject
     public void Action() {
         
     }
-    
+
 }

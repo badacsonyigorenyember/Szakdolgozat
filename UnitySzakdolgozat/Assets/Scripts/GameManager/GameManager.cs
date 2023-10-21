@@ -71,12 +71,14 @@ public class GameManager : MonoBehaviour
     }
 
     IEnumerator TutorialRoutine() {
-        tutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it?";
+        tutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it? (Press 'E' to interact!)";
         yield return new WaitForSeconds(10);
         tutorialText.text = "";
     }
 
-
+    public void Respawn() {
+        
+    }
 
     public void NextLevel() {
         StartCoroutine(NextLevelRoutine());
@@ -104,6 +106,9 @@ public class GameManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             player.CanLook(false);
+            foreach (var enemy in enemies) {
+                enemy.Stop();
+            }
     }
     
     public void Resume() {
@@ -111,6 +116,9 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         player.CanLook(true);
+        foreach (var enemy in enemies) {
+            enemy.Resume();
+        }
     }
 
     public static void EndGame() {

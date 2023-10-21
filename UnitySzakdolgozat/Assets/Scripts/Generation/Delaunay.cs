@@ -133,7 +133,7 @@ public static class Delaunay
             }
 
         }
-        
+
         return finalPaths;
     }
 
