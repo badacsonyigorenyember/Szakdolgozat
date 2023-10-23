@@ -7,12 +7,12 @@ public class LogicGeneration : MonoBehaviour
     private static List<Room> availableRooms;
     private static Room playerRoom;
     private static Room endRoom;
-    private static List<Task> tasks;
+    private static List<Mechanism> tasks;
 
 
     public static bool CreateGameMechanic(List<Room> rooms, int leverCount) {
         ObjectGeneration.LoadPrefabs();
-        tasks = new List<Task>();
+        tasks = new List<Mechanism>();
         availableRooms = rooms;
         
         //tutorial

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Lever : MonoBehaviour, Task, InteractableObject
+public class Lever : MonoBehaviour, Mechanism, InteractableObject
 {
     public List<Door> doors;
 

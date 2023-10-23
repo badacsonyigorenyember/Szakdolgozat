@@ -9,7 +9,7 @@ public class Door : MonoBehaviour
 
     public Room lockedRoom;
 
-    public List<Task> tasks;
+    public List<Mechanism> tasks;
 
     private void Start() {
         startPos = transform.position;

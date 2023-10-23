@@ -1,4 +1,4 @@
-public interface Task
+public interface Mechanism
 {
    public bool Activated { get; set; }
 }

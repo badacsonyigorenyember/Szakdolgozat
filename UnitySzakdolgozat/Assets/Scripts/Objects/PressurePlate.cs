@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PressurePlate : MonoBehaviour, Task, InteractableObject
+public class PressurePlate : MonoBehaviour, Mechanism, InteractableObject
 {
     public bool Activated { get; set; }
 

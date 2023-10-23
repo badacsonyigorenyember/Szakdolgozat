@@ -25,9 +25,9 @@ public class ObjectGeneration : MonoBehaviour
             Debug.LogError("No rooms available to generate lever");
             return null;
         }
-        
+
         room = room ?? availableRooms[Random.Range(0, availableRooms.Count)];
-        
+
         if(remove)
             availableRooms.Remove(room);
         
@@ -105,9 +105,8 @@ public class ObjectGeneration : MonoBehaviour
     
     public static Lever GenerateLevers(List<Room> availableRooms, Room opensThisRoom, Room room = null) { 
         room = SelectRoom(availableRooms, false, room);
-        
-        List<Vector2> wallPositions = room.GetWallPositions();
-        Vector2 leverPos = wallPositions[Random.Range(0, wallPositions.Count)];
+
+        Vector2 leverPos = room.GetRandomWallPosition();
 
         Lever lever;
         
@@ -150,7 +149,7 @@ public class ObjectGeneration : MonoBehaviour
 
     public static List<Door> GenerateDoors(Room room) {
         room.locked = true;
-        foreach (var position in room.DoorsLocations()) {
+        foreach (var position in room.entrancePositions) {
             if (prefabs.TryGetValue("Door", out GameObject doorPrefab)) {
                 Quaternion doorRotation = Quaternion.Euler(0,0,0);
                 switch (position) {
@@ -169,7 +168,7 @@ public class ObjectGeneration : MonoBehaviour
                 doorObj.name = "Door";
 
                 Door door = doorObj.GetComponent<Door>();
-                door.tasks = new List<Task>();
+                door.tasks = new List<Mechanism>();
                 room.doors.Add(door);
                 door.lockedRoom = room;
 

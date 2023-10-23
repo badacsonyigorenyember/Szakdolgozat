@@ -9,12 +9,13 @@ public class Room
 {
     public Rect area;
     private Rect placeHolder;
-    public Vector2[] sidePositions;
-    private BitArray usedSidePositions;
+    public HashSet<Vector2> entrancePositions;
+    public Vector2[] possibleEntrancePositions;
     public List<Room> neighbours;
     public bool locked;
     public List<Door> doors;
     private List<Vector2> occupiedPositions;
+    private List<Vector2> wallPositions;
 
 
     public Room(int mapSize, int maxSize) {
@@ -27,11 +28,12 @@ public class Room
 
         placeHolder = new Rect(area.position - Vector2.one * 2, area.width + 4, area.height + 4);
         
-        usedSidePositions = new BitArray(new[] { 0b0000 });
         neighbours = new List<Room>();
         locked = false;
         doors = new List<Door>();
         occupiedPositions = new List<Vector2>();
+        entrancePositions = new HashSet<Vector2>();
+        wallPositions = new List<Vector2>();
     }
 
     public bool Overlaps(Room other) {
@@ -45,95 +47,67 @@ public class Room
             }
         }
         
-        sidePositions = new Vector2[]
+        possibleEntrancePositions = new Vector2[]
         {
-            new (area.position.x + area.width, area.center.y + Random.Range(-(area.height / 4), area.height / 4)),
-            new (area.center.x + Random.Range(-(area.width / 4), area.width / 4), area.position.y + area.height),
-            new (area.position.x, area.center.y + Random.Range(-(area.height / 4), area.height / 4)),
-            new (area.center.x + Random.Range(-(area.width / 4), area.width / 4), area.position.y)
+            new (area.position.x + area.width, area.center.y + Random.Range(-(area.height / 4), area.height / 4)), //right
+            new (area.center.x + Random.Range(-(area.width / 4), area.width / 4), area.position.y + area.height), //top
+            new (area.position.x, area.center.y + Random.Range(-(area.height / 4), area.height / 4)), // left
+            new (area.center.x + Random.Range(-(area.width / 4), area.width / 4), area.position.y) // bottom
         };
+        
+        GetWallPositions();
 
-    }
-
-    public List<Vector2> DoorsLocations() {
-        return sidePositions.Where((_, i) => usedSidePositions[i]).ToList();
     }
 
     public (Vector2, Vector2) SelectEndPoints(Room other) {
         float angle = Mathf.Atan2(other.area.center.y - area.center.y, other.area.center.x - area.center.x) * Mathf.Rad2Deg + 45;
         angle = angle < 0 ? angle + 360 : angle;
         angle %= 360;
-        Vector2 thisSidePosition = sidePositions[0];
-        Vector2 otherSidePosition = sidePositions[0];
+        Vector2 thisSidePosition = possibleEntrancePositions[0];
+        Vector2 otherSidePosition = other.possibleEntrancePositions[0];
         
         
         switch (angle) {
             case var n when (n > 0 && n <= 90):
-                thisSidePosition = sidePositions[0];
-                otherSidePosition = other.sidePositions[2];
-                
-                usedSidePositions[0] = true;
-                other.usedSidePositions[2] = true;
-                
-                occupiedPositions.Add(sidePositions[0]);
-                other.occupiedPositions.Add(other.sidePositions[2]);
-                
+                thisSidePosition = possibleEntrancePositions[0];
+                otherSidePosition = other.possibleEntrancePositions[2];
                 break;
+            
             case var n when (n > 90 && n <= 180):
-                thisSidePosition = sidePositions[1];
-                otherSidePosition = other.sidePositions[3];
-                
-                usedSidePositions[1] = true;
-                other.usedSidePositions[3] = true;
-                
-                occupiedPositions.Add(sidePositions[1]);
-                other.occupiedPositions.Add(other.sidePositions[3]);
-                
+                thisSidePosition = possibleEntrancePositions[1];
+                otherSidePosition = other.possibleEntrancePositions[3];
                 break;
+            
             case var n when (n > 180 && n <= 270):
-                thisSidePosition = sidePositions[2];
-                otherSidePosition = other.sidePositions[0];
-                
-                usedSidePositions[2] = true;
-                other.usedSidePositions[0] = true;
-                
-                occupiedPositions.Add(sidePositions[2]);
-                other.occupiedPositions.Add(other.sidePositions[0]);
-                
+                thisSidePosition = possibleEntrancePositions[2];
+                otherSidePosition = other.possibleEntrancePositions[0];
                 break;
+            
             case var n when (n > 270 && n <= 360):
-                thisSidePosition = sidePositions[3];
-                otherSidePosition = other.sidePositions[1];
-                
-                usedSidePositions[3] = true;
-                other.usedSidePositions[1] = true;
-                
-                occupiedPositions.Add(sidePositions[3]);
-                other.occupiedPositions.Add(other.sidePositions[1]);
-                
+                thisSidePosition = possibleEntrancePositions[3];
+                otherSidePosition = other.possibleEntrancePositions[1];
                 break;
         }
+
+        entrancePositions.Add(thisSidePosition);
+        wallPositions.Remove(thisSidePosition);
+
+        other.entrancePositions.Add(otherSidePosition);
+        other.wallPositions.Remove(otherSidePosition);
 
         return (thisSidePosition, otherSidePosition);
     }
 
-    public List<Vector2> GetWallPositions() {
-        List<Vector2> walls = new List<Vector2>();
-        for (int y = (int) area.position.y + 1; y < area.position.y + area.height - 1; y++) {
-            if (!usedSidePositions[0] || y != (int) sidePositions[0].y)
-                walls.Add(new Vector2(area.position.x, y));
-            if (!usedSidePositions[2] || y != (int) sidePositions[2].y)
-                walls.Add(new Vector2(area.position.x + area.width, y));
+    private void GetWallPositions() {
+        for (int y = area.yMin + 1; y < area.yMax; y++) {
+            wallPositions.Add(new Vector2(area.xMin, y));
+            wallPositions.Add(new Vector2(area.xMax, y));
         }
         
-        for (int x = (int) area.position.x + 1; x < area.position.x + area.width - 1; x++) {
-            if (!usedSidePositions[1] || x != (int) sidePositions[1].x)
-                walls.Add(new Vector2(x, area.position.y + area.height));
-            if (!usedSidePositions[3] || x != (int) sidePositions[3].x)
-                walls.Add(new Vector2(x, area.position.y));
+        for(int x = area.xMin + 1; x < area.xMax - 1; x++ ) {
+            wallPositions.Add(new Vector2(x, area.yMin));
+            wallPositions.Add(new Vector2(x, area.yMax));
         }
-
-        return walls.Distinct().ToList();
     }
 
     public Vector2 GetRandPositionInRoom() {
@@ -145,6 +119,16 @@ public class Room
         Vector2 pos = new Vector2(Random.Range(area.xMin, area.xMax), Random.Range(area.yMin, area.yMax));
         if (occupiedPositions.Contains(pos))
             pos = GetRandPositionInRoom();
+
+        return pos;
+    }
+
+    public Vector2 GetRandomWallPosition() {
+        int rand = Random.Range(0, wallPositions.Count);
+        if (wallPositions.Count == 0) return new Vector2(-1, -1);
+        
+        Vector2 pos = wallPositions[rand];
+        wallPositions.RemoveAt(rand);
 
         return pos;
     }
