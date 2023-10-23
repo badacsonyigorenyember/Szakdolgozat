@@ -6,26 +6,13 @@ public class Door : MonoBehaviour
 {
     private Vector3 startPos;
     private int duration = 5;
-
-    public Room lockedRoom;
-
-    public List<Mechanism> tasks;
-
+    
     private void Start() {
         startPos = transform.position;
     }
 
     public void Action() {
-        foreach (var task in tasks) {
-            if (!task.Activated) {
-                return;
-            }
-        }
-
-        lockedRoom.locked = false;
-        
         StartCoroutine(RaiseDoor());
-        
     }
 
     private IEnumerator RaiseDoor() {

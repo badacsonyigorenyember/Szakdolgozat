@@ -55,6 +55,10 @@ public class GameManager : MonoBehaviour
         enemies = FindObjectsOfType<Enemy>();
     }
 
+    public static void SetStarterRoom(Room room) {
+        starterRoom = room;
+    }
+
     
 
     public void TaskCompleted() {

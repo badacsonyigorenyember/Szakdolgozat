@@ -1,8 +1,13 @@
 using UnityEngine;
 
-public class PressurePlate : MonoBehaviour, Mechanism, InteractableObject
+public class PressurePlate : MonoBehaviour, IMechanism, InteractableObject
 {
+    private Task task;
+    
     public bool Activated { get; set; }
+    public void AddTask(Task task) {
+        this.task = task;
+    }
 
     public bool IsStationary { get; set; } = true;
 

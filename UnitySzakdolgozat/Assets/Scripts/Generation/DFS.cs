@@ -22,12 +22,12 @@ public class DFS
             }
         }
 
-        List<Room> notArticularPoints = rooms.Where(r => !articulationPoints.Contains(r)).ToList();
+        List<Room> notArticularRooms = rooms.Where(r => !articulationPoints.Contains(r)).ToList();
 
-        if (notArticularPoints.Count == 0)
+        if (notArticularRooms.Count == 0)
             return null;
 
-        return notArticularPoints[Random.Range(0, notArticularPoints.Count)];
+        return notArticularRooms[Random.Range(0, notArticularRooms.Count)];
     }
 
     private static void DepthFirstSearch(Room room, Room parent, Dictionary<Room, bool> visited, Dictionary<Room, int> discoveryTimes, Dictionary<Room, int> lowTimes, List<Room> articulationPoints, int time)

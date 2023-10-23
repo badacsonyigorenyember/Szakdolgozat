@@ -22,7 +22,7 @@ public class ObjectGeneration : MonoBehaviour
 
     private static Room SelectRoom(List<Room> availableRooms, bool remove = true, Room room = null) {
         if (availableRooms.Count == 0) {
-            Debug.LogError("No rooms available to generate lever");
+            Debug.LogError("No rooms available to generate button");
             return null;
         }
 
@@ -34,11 +34,7 @@ public class ObjectGeneration : MonoBehaviour
         return room;
     }
     
-    public static Room StartRoom(List<Room> availableRooms) {
-        Room room = SelectRoom(availableRooms);
-        
-        GenerateLeversAndDoors(availableRooms, room, room);
-
+    public static void StartRoom(Room room) {
         if (prefabs.TryGetValue("Player", out GameObject playerObj)) {
             Vector2 pos = room.area.center;
             Transform player = Instantiate(playerObj, new Vector3(pos.x, 0, pos.y), Quaternion.identity).transform;
@@ -46,24 +42,30 @@ public class ObjectGeneration : MonoBehaviour
             GameManager.player = player.GetComponent<PlayerController>();
         }
         else {
-            return null;
+            return;
         }
         
-        if (prefabs.TryGetValue("Box", out GameObject box)) {
+        if (prefabs.TryGetValue("Box", out GameObject boxObj)) {
             Vector2 pos = room.area.center;
-            Transform player = Instantiate(box, new Vector3(pos.x + 1, 1, pos.y + 1), Quaternion.identity).transform;
+            Transform box = Instantiate(boxObj, new Vector3(pos.x + 1, 1, pos.y + 1), Quaternion.identity).transform;
             box.name = "Box";
         }
-        else {
-            return null;
+        
+        GenerateDoors(room);
+    }
+    
+    public static void GenerateEndRoom(Room room) {
+        if (prefabs.TryGetValue("End", out GameObject endPrefab)) {
+            Vector2 pos = room.area.center;
+            Instantiate(endPrefab, new Vector3(pos.x, 1, pos.y), Quaternion.identity).tag = "Map";
+        } else {
+            Debug.LogError("End prefab not found");
         }
 
-        return room;
+        GenerateDoors(room);
     }
 
-    public static void SpawnEnemyInRoom(List<Room> availableRooms) {
-        Room room = SelectRoom(availableRooms);
-        
+    public static void SpawnEnemyInRoom(Room room) {
         if (prefabs.TryGetValue("Enemy", out GameObject enemyObj)) {
             Vector2 pos = room.area.center;
             Transform enemy = Instantiate(enemyObj, new Vector3(pos.x, 0, pos.y), Quaternion.identity).transform;
@@ -73,85 +75,51 @@ public class ObjectGeneration : MonoBehaviour
         }
     }
     
-    public static Room GenerateEndRoom(List<Room> availableRooms) {
-        if (availableRooms.Count == 0) {
-            Debug.LogError("No rooms available to generate lever");
-            return null;
-        }
-
-        Room room = DFS.FindNotArticularPoint(availableRooms);
-        availableRooms.Remove(room);
-
-        GenerateLeversAndDoors(availableRooms, room);
-        
-        if (room == null) 
-            return null;
-        
-        if (prefabs.TryGetValue("End", out GameObject endPrefab)) {
-            Vector2 pos = room.area.center;
-            Instantiate(endPrefab, new Vector3(pos.x, 1, pos.y), Quaternion.identity).tag = "Map";
-        } else {
-            Debug.LogError("End prefab not found");
-        }
-
-        return room; 
-        
-    }
-
-    public static void GenerateLeversAndDoors(List<Room> availableRooms, Room doorRoom, Room leverRoom = null) {
-        GenerateDoors(doorRoom);
-        GenerateLevers(availableRooms, doorRoom, leverRoom);
-    }
+   
     
-    public static Lever GenerateLevers(List<Room> availableRooms, Room opensThisRoom, Room room = null) { 
-        room = SelectRoom(availableRooms, false, room);
+    
+    
+    public static Button GenerateButton(Room room) {
+        Vector2 buttonPos = room.GetRandomWallPosition();
 
-        Vector2 leverPos = room.GetRandomWallPosition();
-
-        Lever lever;
+        Button button;
         
-        if (prefabs.TryGetValue("Lever", out GameObject leverPrefab)) {
-            Quaternion leverRotation = Quaternion.Euler(0,0,0);
-            switch (leverPos) {
+        if (prefabs.TryGetValue("Button", out GameObject buttonPrefab)) {
+            Quaternion buttonRotation = Quaternion.Euler(0,0,0);
+            switch (buttonPos) {
                 case var v when (int) v.x == (int) room.area.xMin:
-                    leverRotation = Quaternion.Euler(0, -90, 0);
+                    buttonRotation = Quaternion.Euler(0, -90, 0);
                     break;
                 case var v when (int) v.x == (int) room.area.xMax:
-                    leverRotation = Quaternion.Euler(0, 90, 0);
+                    buttonRotation = Quaternion.Euler(0, 90, 0);
                     break;
                 case var v when (int) v.y == (int) room.area.yMin:
-                    leverRotation = Quaternion.Euler(0, 180, 0);
+                    buttonRotation = Quaternion.Euler(0, 180, 0);
                     break;
 
             }
             
-            GameObject leverObj = Instantiate(leverPrefab, new Vector3(leverPos.x, 1, leverPos.y), leverRotation);
-            leverObj.tag = "Map";
+            GameObject buttonObj = Instantiate(buttonPrefab, new Vector3(buttonPos.x, 1, buttonPos.y), buttonRotation);
+            buttonObj.tag = "Map";
 
-            lever = leverObj.GetComponent<Lever>();
-
+            button = buttonObj.GetComponent<Button>();
         }
         else {
-            Debug.LogError("Lever prefab not found");
+            Debug.LogError("button prefab not found");
             return null;
         }
-
-        foreach (var door in opensThisRoom.doors) {
-            if (door != null) {
-                door.tasks.Add(lever);
-                lever.doors.Add(door);
-            }
-        }
-
-        return lever;
+        
+        return button;
 
     }
 
-    public static List<Door> GenerateDoors(Room room) {
+    public static void GenerateDoors(Room room) {
         room.locked = true;
-        foreach (var position in room.entrancePositions) {
-            if (prefabs.TryGetValue("Door", out GameObject doorPrefab)) {
+        
+        if (prefabs.TryGetValue("Door", out GameObject doorPrefab)) {
+            foreach (var position in room.entrancePositions) {
                 Quaternion doorRotation = Quaternion.Euler(0,0,0);
+                
                 switch (position) {
                     case var v when (int) v.x == (int) room.area.xMin:
                         doorRotation = Quaternion.Euler(0, -90, 0);
@@ -164,21 +132,18 @@ public class ObjectGeneration : MonoBehaviour
                         break;
 
                 }
+                
                 GameObject doorObj = Instantiate(doorPrefab, new Vector3(position.x, 0, position.y), doorRotation);
                 doorObj.name = "Door";
 
                 Door door = doorObj.GetComponent<Door>();
-                door.tasks = new List<Mechanism>();
                 room.doors.Add(door);
-                door.lockedRoom = room;
 
-            } else {
-                Debug.LogError("Door prefab not found");
-                return null;
             }
+            
+        } else {
+            Debug.LogError("Door prefab not found");
         }
-        
-        return room.doors;
     }
 
     public static void GeneratePressurePlate(List<Room> availableRooms) {

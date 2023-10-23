@@ -525,7 +525,7 @@ GameObject:
   - component: {fileID: 547925548}
   - component: {fileID: 547925547}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: TaskCountText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1522,7 +1522,7 @@ MonoBehaviour:
   maxRoomSize: 20
   menu: {fileID: 1056830915}
   taskCountText: {fileID: 547925547}
-  taskCount: 10
+  taskCount: 5
   tutorialText: {fileID: 661736740}
 --- !u!4 &1763698438
 Transform:

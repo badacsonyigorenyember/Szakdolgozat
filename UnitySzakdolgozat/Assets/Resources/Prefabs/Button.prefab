@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2336832870028472912}
   - component: {fileID: 6252118892006369271}
   m_Layer: 20
-  m_Name: Lever
+  m_Name: Button
   m_TagString: Map
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
