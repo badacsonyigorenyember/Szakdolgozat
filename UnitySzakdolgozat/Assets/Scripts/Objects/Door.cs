@@ -5,32 +5,52 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
-    private Vector3 startPos;
-    private int duration = 5;
-    private Vector3 upPosition, downPosition, currentPosition;
-    
+    public int duration = 5;
+    public float speed;
+    public float timer;
+    private Vector3 upPosition, downPosition, currentPosition, savedPosition;
+
     private void Start() {
-        startPos = transform.position;
+        downPosition = transform.position;
+        upPosition = downPosition + Vector3.up * 3;
+        currentPosition = downPosition;
     }
 
-    public void Action() {
-        StartCoroutine(RaiseDoor());
-    }
-
-    private void Update() {
+    public void Action(bool doorOpening) {
+        if (doorOpening) {
+            StopCoroutine("CloseDoor");
+            StartCoroutine("RaiseDoor");
+        }
+        else {
+            StopCoroutine("RaiseDoor");
+            StartCoroutine("CloseDoor");
+        }
         
     }
 
+    
+
     private IEnumerator RaiseDoor() {
-        float elapsed = 0f;
-        Vector3 targetPos= transform.position + Vector3.up * 3;
-        while (elapsed < duration) {
-            transform.position = Vector3.Lerp(startPos, targetPos, elapsed / duration);
-            elapsed += Time.deltaTime;
+        while (timer < duration) {
+            timer += Time.deltaTime;
+            transform.position = Vector3.LerpUnclamped(downPosition, upPosition, timer / duration);
             yield return null;
         }
 
-        transform.position = targetPos;
+        timer = duration;
+
+        MapGeneration.BuildNavMesh();
+    }
+
+    private IEnumerator CloseDoor() {
+        while (timer > 0) {
+            timer -= Time.deltaTime;
+            transform.position = Vector3.LerpUnclamped(downPosition, upPosition, timer / duration);
+            yield return null;
+        }
+
+        timer = 0;
+        
         MapGeneration.BuildNavMesh();
     }
 }

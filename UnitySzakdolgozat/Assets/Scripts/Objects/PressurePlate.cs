@@ -1,57 +1,52 @@
-using System;
 using UnityEngine;
 
 public class PressurePlate : MonoBehaviour, IMechanism, InteractableObject
 {
     private Task task;
-    public float movementTime;
-    private float timer = 0;
-    private Vector3 downPosition, upPosition, currentPosition;
+    private Vector3 downPosition, upPosition;
+    private bool pressureStopped;
+    public float speed;
 
     public bool Activated { get; set; }
     
-    public void AddTask(Task task) {
-        this.task = task;
+    public void AddTask(Task t) {
+        task = t;
     }
 
     public bool IsStationary { get; set; } = true;
 
 
     private void Start() {
-        downPosition = upPosition = currentPosition = transform.position;
+        downPosition = upPosition = transform.position;
         downPosition.y = 0f;    
     }
 
     public void Action() {
-        task.MechanismActivated();
+        task.MechanismActivated(Activated);
     }
 
     private void Update() {
-        if (timer > 0) {
-            timer -= Time.deltaTime;
-            float distance = Math.Abs(timer - movementTime) / movementTime;
-            
-            if (Activated) {
-                 transform.position = Vector3.Lerp(currentPosition, downPosition, distance);
-            }
-            else {
-                transform.position = Vector3.Lerp(currentPosition, upPosition, distance);
-            }
+        if (pressureStopped && transform.position.y < upPosition.y) {
+            transform.Translate(Vector3.up * (speed * Time.deltaTime));
         }
     }
 
-
-    private void OnTriggerEnter(Collider other) {
+    private void OnCollisionEnter(Collision c) {
+        pressureStopped = false;
         Activated = true;
-        timer = movementTime - timer;
-        currentPosition = transform.position;
         Action();
     }
 
-    private void OnTriggerExit(Collider other) {
+    private void OnCollisionStay(Collision collisionInfo) {
+        if (collisionInfo.impulse.y != 0 && transform.position.y > downPosition.y) {
+            transform.Translate(Vector3.down * (speed * Time.deltaTime));
+        }
+    }
+
+    private void OnCollisionExit() {
+        pressureStopped = true;
         Activated = false;
-        timer = movementTime - timer;
-        currentPosition = transform.position;
         Action();
     }
+    
 }

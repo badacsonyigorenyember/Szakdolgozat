@@ -61,8 +61,13 @@ public class GameManager : MonoBehaviour
 
     
 
-    public void TaskCompleted() {
-        completedTasksCount++;
+    public void TaskCompleted(bool completed) {
+        if (completed) {
+            completedTasksCount++;
+        }
+        else {
+            completedTasksCount--;
+        }
         taskCountText.text = "Tasks: " + taskCount + "/" + completedTasksCount;
     }
 

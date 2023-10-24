@@ -16,7 +16,7 @@ public class Button : MonoBehaviour, IMechanism, InteractableObject
     public void Action() {
         if (!Activated) {
             Activated = true;
-            task.MechanismActivated();
+            task.MechanismActivated(Activated);
         }
         
     }
