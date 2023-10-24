@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class RoomGeneration
+public static class RoomGeneration
 {
     public static (List<Room>, int) CreateRooms(int roomCount, int mapSize, int maxRoomSize) {
         List<Room> rooms = new List<Room>();

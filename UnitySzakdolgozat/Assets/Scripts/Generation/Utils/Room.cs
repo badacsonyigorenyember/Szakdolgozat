@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Utils;
 using Random = UnityEngine.Random;
@@ -61,37 +59,17 @@ public class Room
 
     public (Vector2, Vector2) SelectEndPoints(Room other) {
         float angle = Mathf.Atan2(other.area.center.y - area.center.y, other.area.center.x - area.center.x) * Mathf.Rad2Deg + 45;
-        angle = angle < 0 ? angle + 360 : angle;
-        angle %= 360;
-        Vector2 thisSidePosition = possibleEntrancePositions[0];
-        Vector2 otherSidePosition = other.possibleEntrancePositions[0];
-        
-        
-        switch (angle) {
-            case var n when (n > 0 && n <= 90):
-                thisSidePosition = possibleEntrancePositions[0];
-                otherSidePosition = other.possibleEntrancePositions[2];
-                break;
-            
-            case var n when (n > 90 && n <= 180):
-                thisSidePosition = possibleEntrancePositions[1];
-                otherSidePosition = other.possibleEntrancePositions[3];
-                break;
-            
-            case var n when (n > 180 && n <= 270):
-                thisSidePosition = possibleEntrancePositions[2];
-                otherSidePosition = other.possibleEntrancePositions[0];
-                break;
-            
-            case var n when (n > 270 && n <= 360):
-                thisSidePosition = possibleEntrancePositions[3];
-                otherSidePosition = other.possibleEntrancePositions[1];
-                break;
-        }
+        angle = (angle + 360) % 360;
+
+        int thisIndex = Mathf.FloorToInt(angle / 90) % 4;
+        int otherIndex = (thisIndex + 2) % 4;
+
+        Vector2 thisSidePosition = possibleEntrancePositions[thisIndex];
+        Vector2 otherSidePosition = other.possibleEntrancePositions[otherIndex];
 
         entrancePositions.Add(thisSidePosition);
         wallPositions.Remove(thisSidePosition);
-
+        
         other.entrancePositions.Add(otherSidePosition);
         other.wallPositions.Remove(otherSidePosition);
 

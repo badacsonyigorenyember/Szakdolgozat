@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Random = UnityEngine.Random;
 
-public class DFS
+public static class DepthFirstSearch
 {
     
     public static Room FindNotArticularPoint(List<Room> rooms) {
@@ -18,7 +18,7 @@ public class DFS
         {
             if (!visited.ContainsKey(room))
             {
-                DepthFirstSearch(room, null, visited, discoveryTimes, lowTimes, articulationPoints, time);
+                DoDepthFirstSearch(room, null, visited, discoveryTimes, lowTimes, articulationPoints, time);
             }
         }
 
@@ -30,7 +30,7 @@ public class DFS
         return notArticularRooms[Random.Range(0, notArticularRooms.Count)];
     }
 
-    private static void DepthFirstSearch(Room room, Room parent, Dictionary<Room, bool> visited, Dictionary<Room, int> discoveryTimes, Dictionary<Room, int> lowTimes, List<Room> articulationPoints, int time)
+    private static void DoDepthFirstSearch(Room room, Room parent, Dictionary<Room, bool> visited, Dictionary<Room, int> discoveryTimes, Dictionary<Room, int> lowTimes, List<Room> articulationPoints, int time)
     {
         visited[room] = true;
         discoveryTimes[room] = time;
@@ -44,7 +44,7 @@ public class DFS
         {
             if (!visited.ContainsKey(neighbor))
             {
-                DepthFirstSearch(neighbor, room, visited, discoveryTimes, lowTimes, articulationPoints, time);
+                DoDepthFirstSearch(neighbor, room, visited, discoveryTimes, lowTimes, articulationPoints, time);
 
                 childCount++;
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PressurePlate : MonoBehaviour, IMechanism, InteractableObject
+public class PressurePlate : MonoBehaviour, IMechanism
 {
     private Task task;
     private Vector3 downPosition, upPosition;
@@ -12,9 +12,6 @@ public class PressurePlate : MonoBehaviour, IMechanism, InteractableObject
     public void AddTask(Task t) {
         task = t;
     }
-
-    public bool IsStationary { get; set; } = true;
-
 
     private void Start() {
         downPosition = upPosition = transform.position;
@@ -31,7 +28,7 @@ public class PressurePlate : MonoBehaviour, IMechanism, InteractableObject
         }
     }
 
-    private void OnCollisionEnter(Collision c) {
+    private void OnCollisionEnter() {
         pressureStopped = false;
         Activated = true;
         Action();

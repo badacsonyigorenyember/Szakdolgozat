@@ -5,7 +5,7 @@ public class ObjectGeneration : MonoBehaviour
 {
     private static Dictionary<string, GameObject> prefabs;
 
-    public static bool LoadPrefabs() {
+    public static void LoadPrefabs() {
         prefabs = new Dictionary<string, GameObject>();
 
         GameObject[] loads = Resources.LoadAll<GameObject>("Prefabs");
@@ -13,11 +13,6 @@ public class ObjectGeneration : MonoBehaviour
         foreach (var prefab in loads) {
             prefabs.Add(prefab.name, prefab);
         }
-
-        if (prefabs.Count == 0)
-            return false;
-
-        return true;
     }
 
     public static void StartRoom(Room room) {
@@ -73,13 +68,13 @@ public class ObjectGeneration : MonoBehaviour
         if (prefabs.TryGetValue("Button", out GameObject buttonPrefab)) {
             Quaternion buttonRotation = Quaternion.Euler(0,0,0);
             switch (buttonPos) {
-                case var v when (int) v.x == (int) room.area.xMin:
+                case var v when (int) v.x == room.area.xMin:
                     buttonRotation = Quaternion.Euler(0, -90, 0);
                     break;
-                case var v when (int) v.x == (int) room.area.xMax:
+                case var v when (int) v.x == room.area.xMax:
                     buttonRotation = Quaternion.Euler(0, 90, 0);
                     break;
-                case var v when (int) v.y == (int) room.area.yMin:
+                case var v when (int) v.y == room.area.yMin:
                     buttonRotation = Quaternion.Euler(0, 180, 0);
                     break;
 
@@ -99,7 +94,7 @@ public class ObjectGeneration : MonoBehaviour
 
     }
 
-    public static void GenerateDoors(Room room) {
+    private static void GenerateDoors(Room room) {
         room.locked = true;
         
         if (prefabs.TryGetValue("Door", out GameObject doorPrefab)) {
@@ -107,13 +102,13 @@ public class ObjectGeneration : MonoBehaviour
                 Quaternion doorRotation = Quaternion.Euler(0,0,0);
                 
                 switch (position) {
-                    case var v when (int) v.x == (int) room.area.xMin:
+                    case var v when (int) v.x == room.area.xMin:
                         doorRotation = Quaternion.Euler(0, -90, 0);
                         break;
-                    case var v when (int) v.x == (int) room.area.xMax:
+                    case var v when (int) v.x == room.area.xMax:
                         doorRotation = Quaternion.Euler(0, 90, 0);
                         break;
-                    case var v when (int) v.y == (int) room.area.yMin:
+                    case var v when (int) v.y == room.area.yMin:
                         doorRotation = Quaternion.Euler(0, 180, 0);
                         break;
 

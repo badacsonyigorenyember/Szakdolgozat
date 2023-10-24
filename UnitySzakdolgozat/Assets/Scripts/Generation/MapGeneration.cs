@@ -20,11 +20,11 @@ public class MapGeneration : MonoBehaviour
         List<Edge> edges = Delaunay.FinalEdges(rooms);
         Debug.Log("háromszög után: " + (Time.realtimeSinceStartup - time));
 
-        Delaunay.PathFinding(edges, rooms, GameManager.map);
+        Delaunay.PathFinding(edges, GameManager.map);
 
         GameObject map = new GameObject {name = "Map", tag = "Map" };
         GenerateFloor(GameManager.map, map);
-        GenerateWalls(3, GameManager.map);
+        GenerateWalls(GameManager.map, map);
 
         GameManager.rooms = rooms;
         Debug.Log("minden után: " + (Time.realtimeSinceStartup - time));
@@ -37,7 +37,7 @@ public class MapGeneration : MonoBehaviour
 
     
 
-    public static void GenerateFloor(Map map, GameObject go) {
+    private static void GenerateFloor(Map map, GameObject go) {
         GameObject floorPrefab = Resources.Load<GameObject>("Prefabs/Floor");
 
         List<CombineInstance> floorInstances = new List<CombineInstance>();
@@ -57,9 +57,10 @@ public class MapGeneration : MonoBehaviour
                         transform = localToWorldMatrix
                     });
 
-                    obj.transform.position = new Vector3(x, 3, y);
-                    obj.transform.rotation = Quaternion.Euler(180, 0, 0);
-                    localToWorldMatrix = obj.transform.localToWorldMatrix;
+                    Transform t = obj.transform;
+                    t.position = new Vector3(x, 3, y);
+                    t.rotation = Quaternion.Euler(180, 0, 0);
+                    localToWorldMatrix = t.localToWorldMatrix;
                     ceilingInstances.Add(new CombineInstance
                     {
                         mesh = mesh,
@@ -106,7 +107,7 @@ public class MapGeneration : MonoBehaviour
     }
     
 
-    public static void GenerateWalls(int wallHeigh, Map map) {
+    private static void GenerateWalls(Map map, GameObject go) {
         GameObject wallPrefab = Resources.Load<GameObject>("Prefabs/Wall");
         
         List<CombineInstance> wallInstances = new List<CombineInstance>();
@@ -184,17 +185,12 @@ public class MapGeneration : MonoBehaviour
             }
         }
         
-        GameObject wall = new GameObject
-        {
-            name = "Wall",
-            tag = "Map"
-        };
         GameObject wallSide = new GameObject
         {
             name = "Wallside",
             transform =
             {
-                parent = wall.transform
+                parent = go.transform
             }
         };
 
@@ -203,7 +199,7 @@ public class MapGeneration : MonoBehaviour
             name = "Skirting",
             transform =
             {
-                parent = wall.transform
+                parent = go.transform
             }
         };
 

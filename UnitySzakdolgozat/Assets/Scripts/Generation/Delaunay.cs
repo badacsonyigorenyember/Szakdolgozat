@@ -144,9 +144,7 @@ public static class Delaunay
             b.neighbours.Add(a);
     }
 
-    public static void PathFinding(List<Edge> edges, List<Room> rooms, Map map) {
-        int count = 0;
-
+    public static void PathFinding(List<Edge> edges, Map map) {
         foreach (var edge in edges) {
             Node start = new Node(edge.start, null);
             HashSet<Node> open = new HashSet<Node>(){ start };
@@ -172,7 +170,6 @@ public static class Delaunay
                         continue;
 
                     int multiplyer = 10;
-                    count++;
                     
                     if (neighbour.HasRoomNextToIt(map.Size))
                         multiplyer += 50;
@@ -185,6 +182,7 @@ public static class Delaunay
                         neighbour.g = cost;
                         neighbour.h = neighbour.GetDistance(edge.end) * 10;
                         neighbour.parent = current;
+                        
                         if(!open.Any(x => x.pos == neighbour.pos))
                             open.Add(neighbour);
                 
@@ -209,32 +207,4 @@ public static class Delaunay
             map[current.pos.x, current.pos.y] = FieldType.Corridor;
     }
 
-    public static bool PathExists(Room start, Room end) {
-        if (end.locked)
-            return false;
-        
-        Queue<Room> rooms = new Queue<Room>();
-        HashSet<Room> visited = new HashSet<Room>();
-        rooms.Enqueue(start);
-        visited.Add(start);
-
-        while (rooms.Count > 0) {
-            Room current = rooms.Dequeue();
-            
-            if (current == end) {
-                return true;
-            }
-            
-            foreach (var neighbor in current.neighbours) {
-                if (!visited.Contains(neighbor) && !neighbor.locked) {
-                    rooms.Enqueue(neighbor);
-                    visited.Add(neighbor);
-                }
-            }
-        }
-
-        return false;
-    }
-    
-    
 }

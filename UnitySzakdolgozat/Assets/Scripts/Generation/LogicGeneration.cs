@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LogicGeneration : MonoBehaviour
+public static class LogicGeneration
 {
     private static Dictionary<string, GameObject> prefabs;
     private static List<Room> availableRooms;
     private static Room playerRoom;
     private static Room endRoom;
-    public static Dictionary<string, Task> tasks;
+    private static Dictionary<string, Task> tasks;
 
 
-    public static bool CreateGameMechanic(List<Room> rooms, int taskCount) {
+    public static void CreateGameMechanic(List<Room> rooms, int taskCount) {
         ObjectGeneration.LoadPrefabs();
         tasks = new Dictionary<string, Task>();
         availableRooms = rooms;
@@ -26,13 +26,8 @@ public class LogicGeneration : MonoBehaviour
             CreateTask("End", button);
         }
         
-        
-        
         SpawnEnemy();
         
-
-        return true;
-
     }
 
     private static void Tutorial() {
@@ -74,7 +69,7 @@ public class LogicGeneration : MonoBehaviour
             return null;
         }
 
-        Room room = DFS.FindNotArticularPoint(availableRooms);
+        Room room = DepthFirstSearch.FindNotArticularPoint(availableRooms);
         
         if (toDelete) availableRooms.Remove(room);
         
@@ -92,7 +87,7 @@ public class LogicGeneration : MonoBehaviour
         return room;
     }
 
-    public static void CreateTask(string name, IMechanism mechanism) {
+    private static void CreateTask(string name, IMechanism mechanism) {
         Task task = tasks[name];
         task.AddMechanism(mechanism);
         mechanism.AddTask(task);

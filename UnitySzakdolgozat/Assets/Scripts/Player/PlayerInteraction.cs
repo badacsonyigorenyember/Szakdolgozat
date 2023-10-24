@@ -19,7 +19,7 @@ public class PlayerInteraction : MonoBehaviour
                 Ray r = new Ray(cam.position, cam.forward);
                 if (Physics.Raycast(r, out RaycastHit hit, interactRange, LayerMask.GetMask("Interactable"))) {
                     Debug.Log(hit.collider);
-                    if (hit.collider.gameObject.TryGetComponent(out InteractableObject interactableScript)) {
+                    if (hit.collider.gameObject.TryGetComponent(out IMechanism interactableScript)) {
                         interactableScript.Action();
                     }
                 }

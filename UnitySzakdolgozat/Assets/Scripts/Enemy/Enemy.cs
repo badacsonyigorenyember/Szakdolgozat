@@ -101,10 +101,11 @@ public class Enemy :MonoBehaviour
     }
 
     void ScanArea() {
-        Vector3 pos = transform.position;
+        Transform t = transform;
+        Vector3 pos = t.position;
         Vector3 dir = player.position - pos;
 
-        float angle = Vector3.Angle(transform.forward, dir);
+        float angle = Vector3.Angle(t.forward, dir);
 
         if (angle > 45f || dir.sqrMagnitude > targetRange) {
             if (state == EnemyState.Chasing) {
@@ -124,9 +125,8 @@ public class Enemy :MonoBehaviour
         }
 
         Ray ray = new Ray(pos, dir.normalized);
-        RaycastHit hit;
         
-        if (Physics.Raycast(ray, out hit, targetRange)) {
+        if (Physics.Raycast(ray, out RaycastHit hit, targetRange)) {
             if (hit.transform.gameObject.layer != LayerMask.NameToLayer("Player")) {
                 return;
             }
@@ -143,33 +143,26 @@ public class Enemy :MonoBehaviour
     }
 
     void SelectNextRoom() {
-        Debug.Log("Selecting NExt room");
         List<Room> possiblerooms = actualRoom.neighbours.Where(r => !r.locked).ToList();
-        int roomsLength = possiblerooms.Count;
-        Room nextRoom;
 
-        if (roomsLength == 0) {
-            previousRoom = actualRoom;
+        if (possiblerooms.Count == 0) {
             SelectPatrolPoints();
             return;
         }
 
-        if (roomsLength == 1) {
-            previousRoom = actualRoom;
+        if (possiblerooms.Count == 1) {
             actualRoom = possiblerooms[0];
             SelectPatrolPoints();
             return;
         }
-        
-        nextRoom = possiblerooms[Random.Range(0, roomsLength)];
-        possiblerooms.Remove(nextRoom);
-        
-        if (nextRoom == previousRoom) {
-            nextRoom = possiblerooms[Random.Range(0, roomsLength)];
-        }
-        
-        actualRoom = nextRoom;
+
+        possiblerooms.Remove(previousRoom);
+
         previousRoom = actualRoom;
+        actualRoom = possiblerooms[Random.Range(0, possiblerooms.Count)];
+        
+        possiblerooms.Remove(actualRoom);
+        
         
         SelectPatrolPoints(); 
     }

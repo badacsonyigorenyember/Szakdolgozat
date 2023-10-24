@@ -2,20 +2,16 @@ using Utils;
 
 public class Map
 {
-    private int size;
+    public int Size { get; private set; }
     private FieldType[,] fieldTypes;
     private bool[,] items;
 
     public Map(int size) {
-        this.size = size;
+        Size = size;
         fieldTypes = new FieldType[size, size];
         items = new bool[size, size];
     }
-
-    public int Size {
-        get => size;
-        set => size = value;
-    }
+    
     
     public FieldType this[float x, float y] {
         get => fieldTypes[(int) x, (int) y];
@@ -25,13 +21,5 @@ public class Map
     public FieldType this[int x, int y] {
         get => fieldTypes[x, y];
         set => fieldTypes[x, y] = value;
-    }
-
-    public void SetItem(int x, int y) {
-        items[x, y] = true;
-    }
-
-    public bool HasItem(int x, int y) {
-        return items[x, y];
     }
 }
