@@ -58,6 +58,8 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
-.DS_Store
-.idea
+UnitySzakdolgozat/.DS_Store
+UnitySzakdolgozat/.idea/
 
+.DS_Store
+UnitySzakdolgozat/.DS_Store
