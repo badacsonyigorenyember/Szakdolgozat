@@ -198,10 +198,10 @@ public class Enemy :MonoBehaviour
     void SelectPatrolPoints() {
         int patrolPointNumber = Math.Min(maxPatrolPointNumber, actualRoom.area.width * actualRoom.area.height / 30);
         while (patrolPoints.Count <= patrolPointNumber) {
-            Vector2 point = actualRoom.GetRandPositionInRoom();
+            Vector2 point = actualRoom.GetRandPositionInRoom(false);
             
             if (patrolPoints.Any(p => Vector3.Distance(p, new Vector3(point.x, 0, point.y)) < 2f)) {
-                point = actualRoom.GetRandPositionInRoom();
+                point = actualRoom.GetRandPositionInRoom(false);
             }
 
             patrolPoints.Add(new(point.x, 0, point.y));

@@ -26,7 +26,7 @@ public class LogicGeneration : MonoBehaviour
             CreateTask("End", button);
         }
         
-        //ObjectGeneration.GeneratePressurePlate(availableRooms);
+        
         
         SpawnEnemy();
         
@@ -46,8 +46,11 @@ public class LogicGeneration : MonoBehaviour
         Task task = new Task(room);
         Button button = ObjectGeneration.GenerateButton(room);
         task.AddMechanism(button);
+        PressurePlate plate = ObjectGeneration.GeneratePressurePlate(room);
+        task.AddMechanism(plate);
         tasks["Start"] = task;
-
+        
+        
     }
 
     private static void EndRoom() {

@@ -20,20 +20,6 @@ public class ObjectGeneration : MonoBehaviour
         return true;
     }
 
-    private static Room SelectRoom(List<Room> availableRooms, bool remove = true, Room room = null) {
-        if (availableRooms.Count == 0) {
-            Debug.LogError("No rooms available to generate button");
-            return null;
-        }
-
-        room = room ?? availableRooms[Random.Range(0, availableRooms.Count)];
-
-        if(remove)
-            availableRooms.Remove(room);
-        
-        return room;
-    }
-    
     public static void StartRoom(Room room) {
         if (prefabs.TryGetValue("Player", out GameObject playerObj)) {
             Vector2 pos = room.area.center;
@@ -146,17 +132,22 @@ public class ObjectGeneration : MonoBehaviour
         }
     }
 
-    public static void GeneratePressurePlate(List<Room> availableRooms) {
-        Room room = SelectRoom(availableRooms, false);
+    public static PressurePlate GeneratePressurePlate(Room room) {
+        Vector2 pos = room.GetRandPositionInRoom(true);
 
-        Vector2 pos = room.GetRandPositionInRoom();
+        PressurePlate plate;
 
         if (prefabs.TryGetValue("Pressure Plate", out GameObject platePrefab)) {
-            GameObject plate = Instantiate(platePrefab, new Vector3(pos.x, 0.1f, pos.y), Quaternion.identity);
-            plate.name = "Pressure Plate";
-            
+            GameObject plateObj = Instantiate(platePrefab, new Vector3(pos.x, 0.05f, pos.y), Quaternion.identity);
+            plateObj.name = "Pressure Plate";
+
+            plate = plateObj.GetComponent<PressurePlate>();
+
         } else {
             Debug.LogError("Pressure plate prefab not found");
+            return null;
         }
+
+        return plate;
     }
 }

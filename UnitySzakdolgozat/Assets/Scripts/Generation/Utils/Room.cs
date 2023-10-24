@@ -14,7 +14,7 @@ public class Room
     public List<Room> neighbours;
     public bool locked;
     public List<Door> doors;
-    private List<Vector2> occupiedPositions;
+    private List<Vector2> usedFloorPositions;
     private List<Vector2> wallPositions;
 
 
@@ -31,7 +31,7 @@ public class Room
         neighbours = new List<Room>();
         locked = false;
         doors = new List<Door>();
-        occupiedPositions = new List<Vector2>();
+        usedFloorPositions = new List<Vector2>();
         entrancePositions = new HashSet<Vector2>();
         wallPositions = new List<Vector2>();
     }
@@ -110,16 +110,20 @@ public class Room
         }
     }
 
-    public Vector2 GetRandPositionInRoom() {
-        if (occupiedPositions.Count >= area.width * area.height) {
+    public Vector2 GetRandPositionInRoom(bool toRemove) {
+        if (usedFloorPositions.Count >= area.width ) {
             Debug.LogError("No more empty space in this room!");
             return new Vector2(-1, -1);
         }
         
-        Vector2 pos = new Vector2(Random.Range(area.xMin, area.xMax), Random.Range(area.yMin, area.yMax));
-        if (occupiedPositions.Contains(pos))
-            pos = GetRandPositionInRoom();
+        Vector2 pos = new Vector2(Random.Range(area.xMin + 1, area.xMax - 1), Random.Range(area.yMin + 1, area.yMax - 1));
+        
+        if (usedFloorPositions.Contains(pos))
+            pos = GetRandPositionInRoom(toRemove);
 
+        if(toRemove)
+            usedFloorPositions.Add(pos);
+        
         return pos;
     }
 

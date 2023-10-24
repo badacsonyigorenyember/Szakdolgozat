@@ -48,10 +48,10 @@ public class GameManager : MonoBehaviour
 
     private void GenerateMap() {
         MapGeneration.GenerateMap(roomCount, mapSize, maxRoomSize);
-        LogicGeneration.CreateGameMechanic(availableRooms, taskCount);
+        LogicGeneration.CreateGameMechanic(availableRooms, taskCount - 1);
         MapGeneration.BuildNavMesh();
         completedTasksCount = 0;
-        taskCountText.text = "Tasks: " + (taskCount + 2) + "/" + completedTasksCount;
+        taskCountText.text = "Tasks: " + taskCount + "/" + completedTasksCount;
         enemies = FindObjectsOfType<Enemy>();
     }
 
@@ -63,7 +63,7 @@ public class GameManager : MonoBehaviour
 
     public void TaskCompleted() {
         completedTasksCount++;
-        taskCountText.text = "Tasks: " + (taskCount + 2) + "/" + completedTasksCount;
+        taskCountText.text = "Tasks: " + taskCount + "/" + completedTasksCount;
     }
 
     IEnumerator NextLevelRoutine() {

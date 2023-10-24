@@ -1522,7 +1522,7 @@ MonoBehaviour:
   maxRoomSize: 20
   menu: {fileID: 1056830915}
   taskCountText: {fileID: 547925547}
-  taskCount: 5
+  taskCount: 3
   tutorialText: {fileID: 661736740}
 --- !u!4 &1763698438
 Transform:

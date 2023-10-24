@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ public class Door : MonoBehaviour
 {
     private Vector3 startPos;
     private int duration = 5;
+    private Vector3 upPosition, downPosition, currentPosition;
     
     private void Start() {
         startPos = transform.position;
@@ -13,6 +15,10 @@ public class Door : MonoBehaviour
 
     public void Action() {
         StartCoroutine(RaiseDoor());
+    }
+
+    private void Update() {
+        
     }
 
     private IEnumerator RaiseDoor() {
