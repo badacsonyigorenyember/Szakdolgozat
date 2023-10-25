@@ -1,7 +1,11 @@
 using UnityEngine;
 
-public class MovableObject : MonoBehaviour, InteractableObject
+public class MovableObject : MonoBehaviour, IInteractableObject
 {
     public bool IsStationary { get; } = false;
+
+    public void Action() {
+        
+    }
 
 }

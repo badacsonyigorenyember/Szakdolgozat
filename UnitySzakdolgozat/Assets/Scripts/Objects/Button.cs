@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Button : MonoBehaviour, IMechanism, InteractableObject
+public class Button : MonoBehaviour, IMechanism, IInteractableObject
 {
     private Task task;
 

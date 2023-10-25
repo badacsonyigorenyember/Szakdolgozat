@@ -3,141 +3,117 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour
+public static class GameManager
 {
-    public static GameManager instance;
+    public static List<Room> Rooms;
+    public static List<Room> AvailableRooms;
+    public static int RoomCount = 3;
+    private static int ActualRooms;
+    public static int MapSize = 30;
+    public static int MaxRoomSize = 20;
     
-    public static List<Room> rooms;
-    public static List<Room> availableRooms;
-    public int roomCount;
-    private int actualRooms;
-    public int mapSize;
-    public int maxRoomSize;
-
-    public GameObject menu;
+    public static Map Map;
     
-    public static Map map;
-
-    public static PlayerController player;
-    public static Room starterRoom;
+    public static int TaskCount = 3;
+    public static int EnemyCount;
+    public static int CompletedTasksCount;
     
-    public TextMeshProUGUI taskCountText;
-    public int taskCount;
-    public static int completedTasksCount;
+    public static float LookingSensitivity = 200f;
 
-    public TextMeshProUGUI tutorialText;
+    private static List<Enemy> Enemies = new List<Enemy>();
 
-    public static float lookingSensitivity = 200f;
+    private static GameObject Menu;
+    public static PlayerController Player;
+    private static TextMeshProUGUI TaskText;
+    
 
-    private static Enemy[] enemies;
+    public static void SetPlayer(PlayerController player) {
+        Player = player;
+    }
 
-
-    private void Start() {
-        instance = this;
+    public static void AddEnemy(Enemy enemy) {
+        Enemies.Add(enemy);
+    }
+    
+    public static void GenerateMap() {
+        Debug.Log(RoomCount);
+        MapGeneration.GenerateMap(RoomCount, MapSize, MaxRoomSize);
+        LogicGeneration.CreateGameMechanic(AvailableRooms, TaskCount - 1);
         
-        GenerateMap();
-
-        Tutorial();
+        CompletedTasksCount = 0;
         
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        menu.SetActive(false);
-
+        Menu = GameObject.Find("Menu");
+        
+        TaskText = GameObject.Find("TaskCountText").GetComponent<TextMeshProUGUI>();
+        TaskText.text = "Tasks: " + 0 + "/" + TaskCount;
     }
 
-    private void GenerateMap() {
-        MapGeneration.GenerateMap(roomCount, mapSize, maxRoomSize);
-        LogicGeneration.CreateGameMechanic(availableRooms, taskCount - 1);
-        MapGeneration.BuildNavMesh();
-        completedTasksCount = 0;
-        taskCountText.text = "Tasks: " + taskCount + "/" + completedTasksCount;
-        enemies = FindObjectsOfType<Enemy>();
-    }
-
-    public static void SetStarterRoom(Room room) {
-        starterRoom = room;
-    }
-
-    
-
-    public void TaskCompleted(bool completed) {
+    public static void TaskCompleted(bool completed) {
         if (completed) {
-            completedTasksCount++;
+            CompletedTasksCount++;
         }
         else {
-            completedTasksCount--;
+            CompletedTasksCount--;
         }
-        taskCountText.text = "Tasks: " + taskCount + "/" + completedTasksCount;
+
+        TaskText.text = "Tasks: " + CompletedTasksCount + "/" + TaskCount;
     }
 
-    IEnumerator NextLevelRoutine() {
-        yield return new WaitForSeconds(5);
-        roomCount++;
-        taskCount++;
+    private static void TutorialText(TextMeshProUGUI tmp) {
+        float timer = 0;
+        tmp.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it? (Press 'E' to interact!)";
+
+        while (timer < 10) {
+            timer += Time.deltaTime;
+        }
         
-        ClearObjects(new [] {"Map", "Player"});
-        foreach (var enemy in enemies) {
-            Destroy(enemy);
-        }
-        GenerateMap();
-    }
-
-    IEnumerator TutorialRoutine() {
-        tutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it? (Press 'E' to interact!)";
-        yield return new WaitForSeconds(10);
-        tutorialText.text = "";
+        tmp.text = "";
     }
 
     public static void Respawn() {
-        player.transform.position = new Vector3(starterRoom.area.center.x, 0, starterRoom.area.center.y);
-        foreach (var enemy in enemies) {
+        Room playerRoom = Player.starterRoom;
+        Player.transform.position = new Vector3(playerRoom.area.center.x, 0, playerRoom.area.center.y);
+        
+        foreach (var enemy in Enemies) {
             enemy.Respawn();
         }
     }
 
-    public void NextLevel() {
-        StartCoroutine(NextLevelRoutine());
+    public static void NextLevel() {
+        TaskCount++;
+        RoomCount++;
+        SceneManager.LoadScene("SampleScene");
     }
 
-    public void Tutorial() {
-        StartCoroutine(TutorialRoutine());
-    }
-
-    void ClearObjects(String[] toDestroyTags) {
-        foreach (var t in toDestroyTags) {
-            var objectsWithTag = GameObject.FindGameObjectsWithTag(t);
-            foreach (var obj in objectsWithTag) {
-                Destroy(obj);
-            }
-        }
-    }
-
-    public void SetSensitivity(float value) {
-        lookingSensitivity = value;
-    }
-
-    public void Pause() {
-            menu.SetActive(true);
+    public static void Pause() {
+            Menu.SetActive(true);
+            
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            player.CanLook(false);
-            foreach (var enemy in enemies) {
+            
+            Player.CanLook(false);
+            
+            foreach (var enemy in Enemies) {
                 enemy.Stop();
             }
     }
     
-    public void Resume() {
-        menu.SetActive(false);
+    public static void Resume() {
+        Menu.SetActive(false);
+        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        player.CanLook(true);
-        foreach (var enemy in enemies) {
+        
+        Player.CanLook(true);
+        
+        foreach (var enemy in Enemies) {
             enemy.Resume();
         }
     }
 
-    public static void EndGame() {
+    public static void QuitGame() {
         Application.Quit();
     }
 }

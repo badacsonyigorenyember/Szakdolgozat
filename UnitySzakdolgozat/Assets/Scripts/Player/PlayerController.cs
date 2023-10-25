@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     public PlayerLooking looking;
     public PlayerInteraction interaction;
     public PlayerMovement movement;
+
+    public Room starterRoom;
     
     private void Start() {
         movement.Initialize(speed, gravity, jump, groundCheck);
@@ -24,8 +26,16 @@ public class PlayerController : MonoBehaviour
         movement.Move();
     }
 
+    public void SetRoom(Room room) {
+        starterRoom = room;
+    }
+
+    public void SetSensitivity(float value) {
+        looking.sensitivity = value;
+    }
+
     public void CanLook(bool value) {
         looking.canLook = value;
     }
-    
+
 }

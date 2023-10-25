@@ -35,13 +35,11 @@ public static class LogicGeneration
         if (room == null) return;
 
         ObjectGeneration.StartRoom(room);
-
-        GameManager.SetStarterRoom(room);
-
+        
         Task task = new Task(room);
         Button button = ObjectGeneration.GenerateButton(room);
         task.AddMechanism(button);
-        PressurePlate plate = ObjectGeneration.GeneratePressurePlate(room);
+        PressurePlate plate = ObjectGeneration.GeneratePressurePlate(room, room);
         task.AddMechanism(plate);
         tasks["Start"] = task;
         

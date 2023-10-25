@@ -19,7 +19,7 @@ public class PickupManager : MonoBehaviour
         if (heldObj == null) {
             Ray r = new Ray(cam.position, cam.forward);
             if (Physics.Raycast(r, out RaycastHit hit, 2f, LayerMask.GetMask("Interactable"))) {
-                if (hit.collider.gameObject.TryGetComponent(out InteractableObject interactableScript)) {
+                if (hit.collider.gameObject.TryGetComponent(out IInteractableObject interactableScript)) {
                     if (!interactableScript.IsStationary) {
                         PickupObj(hit.collider.gameObject);
                     }

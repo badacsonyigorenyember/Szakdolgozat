@@ -20,18 +20,15 @@ public class ObjectGeneration : MonoBehaviour
             Vector2 pos = room.area.center;
             Transform player = Instantiate(playerObj, new Vector3(pos.x, 0, pos.y), Quaternion.identity).transform;
             player.name = "Player";
-            GameManager.player = player.GetComponent<PlayerController>();
+            player.GetComponent<PlayerController>().starterRoom = room;
+            
+            GameManager.SetPlayer(player.GetComponent<PlayerController>());
+            
         }
         else {
             return;
         }
-        
-        if (prefabs.TryGetValue("Box", out GameObject boxObj)) {
-            Vector2 pos = room.area.center;
-            Transform box = Instantiate(boxObj, new Vector3(pos.x + 1, 1, pos.y + 1), Quaternion.identity).transform;
-            box.name = "Box";
-        }
-        
+
         GenerateDoors(room);
     }
     
@@ -47,12 +44,11 @@ public class ObjectGeneration : MonoBehaviour
     }
 
     public static void SpawnEnemyInRoom(Room room) {
-        if (prefabs.TryGetValue("Enemy", out GameObject enemyObj)) {
+        if (prefabs.TryGetValue("Enemy", out GameObject enemyPrefab)) {
             Vector2 pos = room.area.center;
-            Transform enemy = Instantiate(enemyObj, new Vector3(pos.x, 0, pos.y), Quaternion.identity).transform;
-            enemy.name = "Enemy";
-            enemy.GetComponent<Enemy>().starterRoom = room;
-
+            GameObject enemyObj = Instantiate(enemyPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+            enemyObj.name = "Enemy";
+            enemyObj.GetComponent<Enemy>().starterRoom = room;
         }
     }
     
@@ -119,6 +115,9 @@ public class ObjectGeneration : MonoBehaviour
 
                 Door door = doorObj.GetComponent<Door>();
                 room.doors.Add(door);
+                door.SetRoom(room);
+                
+                MapGeneration.BuildNavMesh();
 
             }
             
@@ -127,19 +126,32 @@ public class ObjectGeneration : MonoBehaviour
         }
     }
 
-    public static PressurePlate GeneratePressurePlate(Room room) {
-        Vector2 pos = room.GetRandPositionInRoom(true);
+    public static PressurePlate GeneratePressurePlate(Room plateRoom, Room boxRoom) {
+        Vector2 platePos = plateRoom.GetRandPositionInRoom(true);
 
         PressurePlate plate;
 
         if (prefabs.TryGetValue("Pressure Plate", out GameObject platePrefab)) {
-            GameObject plateObj = Instantiate(platePrefab, new Vector3(pos.x, 0.05f, pos.y), Quaternion.identity);
+            GameObject plateObj = Instantiate(platePrefab, new Vector3(platePos.x, 0.05f, platePos.y), Quaternion.identity);
             plateObj.name = "Pressure Plate";
 
             plate = plateObj.GetComponent<PressurePlate>();
 
+            GameManager.TaskCount++;
+
         } else {
             Debug.LogError("Pressure plate prefab not found");
+            return null;
+        }
+        
+        if (prefabs.TryGetValue("Box", out GameObject boxPrefab)) {
+            Vector2 boxPos = boxRoom.area.center;
+            GameObject boxObj = Instantiate(boxPrefab, new Vector3(boxPos.x + 1, 1, boxPos.y + 1), Quaternion.identity);
+            boxObj.name = "Box";
+            boxObj.tag = "Map";
+        }
+        else {
+            Debug.LogError("Box prefab not found");
             return null;
         }
 

@@ -6,6 +6,7 @@ public class Door : MonoBehaviour
     public int duration;
     public float timer;
     private Vector3 upPosition, downPosition;
+    private Room room;
 
     private void Start() {
         downPosition = transform.position;
@@ -24,7 +25,9 @@ public class Door : MonoBehaviour
         
     }
 
-    
+    public void SetRoom(Room r) {
+        room = r;
+    }
 
     private IEnumerator RaiseDoor() {
         while (timer < duration) {
@@ -36,7 +39,8 @@ public class Door : MonoBehaviour
         }
 
         timer = duration;
-
+        room.locked = false;
+        
         MapGeneration.BuildNavMesh();
     }
 
@@ -50,6 +54,7 @@ public class Door : MonoBehaviour
         }
 
         timer = 0;
+        room.locked = true;
         
         MapGeneration.BuildNavMesh();
     }

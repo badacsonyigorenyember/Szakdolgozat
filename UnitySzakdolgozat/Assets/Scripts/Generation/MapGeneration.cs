@@ -13,20 +13,20 @@ public class MapGeneration : MonoBehaviour
         float time = Time.realtimeSinceStartup;
         List<Room> rooms;
         (rooms, mapSize) = RoomGeneration.CreateRooms(roomCount, mapSize, maxRoomSize);
-        GameManager.availableRooms = rooms;
-        GameManager.map = new Map((mapSize + maxRoomSize) * 2 + 1);
-        rooms.ForEach(r => r.ClaimArea(GameManager.map));
+        GameManager.AvailableRooms = rooms;
+        GameManager.Map = new Map((mapSize + maxRoomSize) * 2 + 1);
+        rooms.ForEach(r => r.ClaimArea(GameManager.Map));
         
         List<Edge> edges = Delaunay.FinalEdges(rooms);
         Debug.Log("háromszög után: " + (Time.realtimeSinceStartup - time));
 
-        Delaunay.PathFinding(edges, GameManager.map);
+        Delaunay.PathFinding(edges, GameManager.Map);
 
         GameObject map = new GameObject {name = "Map", tag = "Map" };
-        GenerateFloor(GameManager.map, map);
-        GenerateWalls(GameManager.map, map);
+        GenerateFloor(GameManager.Map, map);
+        GenerateWalls(GameManager.Map, map);
 
-        GameManager.rooms = rooms;
+        GameManager.Rooms = rooms;
         Debug.Log("minden után: " + (Time.realtimeSinceStartup - time));
         
     }

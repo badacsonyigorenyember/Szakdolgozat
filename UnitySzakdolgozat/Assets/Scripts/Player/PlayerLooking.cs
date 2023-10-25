@@ -15,7 +15,6 @@ public class PlayerLooking : MonoBehaviour
     }
 
     public void Look() {
-        sensitivity = GameManager.lookingSensitivity;
         if (canLook) {
             float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * sensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * sensitivity;

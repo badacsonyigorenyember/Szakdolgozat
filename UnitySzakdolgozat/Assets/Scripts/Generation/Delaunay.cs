@@ -104,16 +104,9 @@ public static class Delaunay
         List<Edge> mst = MinimalSpanningTree(fullTriangulation, rooms[0].area.center, rooms.Count);
         List<Edge> finalPaths = new List<Edge>(mst.Count);
         finalPaths.AddRange(mst);
-        
-        
-        foreach (var e in fullTriangulation) {
-            if (!finalPaths.Any(edge => e.Equals(edge) )) {
 
-                if (Random.Range(0f, 1f) <= 0.15f) {
-                    finalPaths.Add(e);
-                }
-            }
-        }
+        finalPaths.AddRange(fullTriangulation
+            .Where(edge => !finalPaths.Any(e => edge.Equals(e)) && Random.Range(0f, 1f) <= 0.15f));
 
         foreach (var edge in finalPaths) {
             Room room1 = null, room2 = null;

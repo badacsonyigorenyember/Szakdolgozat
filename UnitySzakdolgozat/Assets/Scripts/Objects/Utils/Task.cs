@@ -18,8 +18,7 @@ public class Task
     }
 
     public void MechanismActivated(bool activated) {
-        var gm = GameManager.instance;
-        gm.TaskCompleted(activated);
+        GameManager.TaskCompleted(activated);
 
         if (mechanisms.Any(m => !m.Activated)) {
             if (finishedTask) {

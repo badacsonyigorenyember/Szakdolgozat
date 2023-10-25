@@ -200,7 +200,7 @@ namespace GeometryUtils
                     Vector2 position = this.pos + new Vector2(x, y);
                     if(position.x >= 0 && position.x < mapSize && 
                        position.y >= 0 && position.y < mapSize)
-                        if (GameManager.map[position.x, position.y] == FieldType.Room)
+                        if (GameManager.Map[position.x, position.y] == FieldType.Room)
                             return true;
                 }
                 

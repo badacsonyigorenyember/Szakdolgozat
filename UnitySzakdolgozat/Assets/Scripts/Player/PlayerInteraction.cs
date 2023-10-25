@@ -15,11 +15,9 @@ public class PlayerInteraction : MonoBehaviour
     public void InteractionHandling() {
         if (!menuActive) {
             if (Input.GetKeyDown(KeyCode.E)) {
-                Debug.Log("E");
                 Ray r = new Ray(cam.position, cam.forward);
                 if (Physics.Raycast(r, out RaycastHit hit, interactRange, LayerMask.GetMask("Interactable"))) {
-                    Debug.Log(hit.collider);
-                    if (hit.collider.gameObject.TryGetComponent(out IMechanism interactableScript)) {
+                    if (hit.collider.gameObject.TryGetComponent(out IInteractableObject interactableScript)) {
                         interactableScript.Action();
                     }
                 }
@@ -32,11 +30,11 @@ public class PlayerInteraction : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.Escape)) {
             if (menuActive) {
-                GameManager.instance.Resume();
+                GameManager.Resume();
                 menuActive = false;
             }
             else {
-                GameManager.instance.Pause();
+                GameManager.Pause();
                 menuActive = true;
             }
                 

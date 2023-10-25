@@ -33,15 +33,22 @@ public class Enemy :MonoBehaviour
     
     void Start() {
         transform.position = new Vector3(starterRoom.area.center.x, 0, starterRoom.area.center.y);
+        player = GameObject.Find("Player").transform;
+        Init();
+        SelectPatrolPoints();
+        GameManager.AddEnemy(this);
+    }
+
+    void Init() {
         agent = transform.GetComponent<NavMeshAgent>();
+        agent.Warp(new Vector3(starterRoom.area.center.x, 0, starterRoom.area.center.y));
         patrolPoints = new List<Vector3>();
         actualRoom = starterRoom;
         previousRoom = null;
         target = null;
-        player = GameObject.Find("Player").transform;
         state = EnemyState.Idle;
-        SelectPatrolPoints();
         isStopped = false;
+        SelectPatrolPoints();
     }
 
     private void Update() {
@@ -101,6 +108,9 @@ public class Enemy :MonoBehaviour
     }
 
     void ScanArea() {
+        if (player == null) {
+            player = GameObject.Find("Player").transform;
+        }
         Transform t = transform;
         Vector3 pos = t.position;
         Vector3 dir = player.position - pos;
@@ -169,8 +179,7 @@ public class Enemy :MonoBehaviour
 
 
     void SelectClosestRoomToPatrol() {
-        Debug.Log("SelectingClosestRoom");
-        List<Room> rooms = GameManager.rooms;
+        List<Room> rooms = GameManager.Rooms;
         Room closest = rooms[0];
 
         foreach (var room in rooms) {
@@ -180,10 +189,8 @@ public class Enemy :MonoBehaviour
             }
         }
 
-        Debug.Log("actualroom: " + actualRoom);
         actualRoom = closest;
         SelectPatrolPoints();
-        Debug.Log("PatrolpointS: " + patrolPoints.Count);
     }
     
     
@@ -223,8 +230,7 @@ public class Enemy :MonoBehaviour
     }
 
     public void Respawn() {
-        agent.isStopped = true;
-        Start();
+        Init();
     }
     
     
