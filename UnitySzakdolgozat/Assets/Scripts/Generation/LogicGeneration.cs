@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public static class LogicGeneration
 {
@@ -10,7 +12,7 @@ public static class LogicGeneration
     private static Dictionary<string, Task> tasks;
 
 
-    public static void CreateGameMechanic(List<Room> rooms, int taskCount) {
+    public static void CreateGameMechanic(List<Room> rooms, int taskCount, int everyNIsPressurePlate, int enemyCount) {
         ObjectGeneration.LoadPrefabs();
         tasks = new Dictionary<string, Task>();
         availableRooms = rooms;
@@ -22,12 +24,22 @@ public static class LogicGeneration
         EndRoom();
 
         for (int i = 0; i < taskCount; i++) {
-            Button button = ObjectGeneration.GenerateButton(FindRandomRoom(false));
-            CreateTask("End", button);
+            IMechanism mechanism;
+            if ((i + 1) % everyNIsPressurePlate == 0) {
+                mechanism =
+                    ObjectGeneration.GeneratePressurePlate(FindRandomRoom(false), FindRandomRoom(false));
+            }
+            else {
+                mechanism = ObjectGeneration.GenerateButton(FindRandomRoom(false));
+            }
+            
+            CreateTask("End", mechanism);
         }
-        
-        SpawnEnemy();
-        
+
+        for (int i = 0; i < enemyCount; i++) {
+            SpawnEnemy();
+        }
+
     }
 
     private static void Tutorial() {
@@ -42,8 +54,8 @@ public static class LogicGeneration
         PressurePlate plate = ObjectGeneration.GeneratePressurePlate(room, room);
         task.AddMechanism(plate);
         tasks["Start"] = task;
-        
-        
+        GameManager.TaskCount += 2;
+
     }
 
     private static void EndRoom() {

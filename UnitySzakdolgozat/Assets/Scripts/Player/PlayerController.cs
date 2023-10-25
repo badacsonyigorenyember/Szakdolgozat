@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private void Start() {
         movement.Initialize(speed, gravity, jump, groundCheck);
         interaction.Initialize(interactRange);
-        looking.Initialize(400f, transform);
+        looking.Initialize(GameManager.LookingSensitivity, transform);
     }
 
     private void Update() {

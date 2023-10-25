@@ -48,7 +48,7 @@ public class ObjectGeneration : MonoBehaviour
             Vector2 pos = room.area.center;
             GameObject enemyObj = Instantiate(enemyPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
             enemyObj.name = "Enemy";
-            enemyObj.GetComponent<Enemy>().starterRoom = room;
+            enemyObj.GetComponent<Enemy>().StartRoom = room;
         }
     }
     
@@ -136,9 +136,7 @@ public class ObjectGeneration : MonoBehaviour
             plateObj.name = "Pressure Plate";
 
             plate = plateObj.GetComponent<PressurePlate>();
-
-            GameManager.TaskCount++;
-
+            
         } else {
             Debug.LogError("Pressure plate prefab not found");
             return null;
