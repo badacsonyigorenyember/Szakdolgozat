@@ -8,8 +8,6 @@ public class SpikeEnemy : StationaryEnemy
     [SerializeField]
     private float WaitTime;
 
-     
-
     private Vector3 EndPosition;
     private float Timer;
      
@@ -21,6 +19,9 @@ public class SpikeEnemy : StationaryEnemy
         base.Start();
         EndPosition = BasePosition + Vector3.up * MovingRange;
         IsMoving = true;
+        Type = EnemyType.Spike;
+        State = SpikeState.Waiting;
+        PreviousState = SpikeState.GoingDown;
     }
 
     private void Update() {

@@ -15,6 +15,7 @@ public class EndOfMap : MonoBehaviour, IInteractableObject
     }
 
     private IEnumerator EndCoroutine() {
+        Debug.Log("End");
         float timer = 0;
         while (timer < duration) {
             timer += Time.deltaTime;

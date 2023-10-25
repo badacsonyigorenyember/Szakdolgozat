@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6790263510576514945}
   - component: {fileID: 4202038951581709023}
   - component: {fileID: 4701635932169133713}
-  - component: {fileID: 8064197953785440632}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -84,19 +83,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8064197953785440632
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4018975422293451559}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: -0.0000038146973}
 --- !u!1 &7143585612911437694
 GameObject:
   m_ObjectHideFlags: 0
@@ -173,7 +159,7 @@ Light:
       e33: 1
     m_UseCullingMatrixOverride: 0
   m_Cookie: {fileID: 0}
-  m_DrawHalo: 0
+  m_DrawHalo: 1
   m_Flare: {fileID: 0}
   m_RenderMode: 0
   m_CullingMask:
@@ -203,8 +189,9 @@ GameObject:
   - component: {fileID: 8833005228260070353}
   - component: {fileID: -871052987672220102}
   - component: {fileID: 4709910617842529577}
+  - component: {fileID: -246702853314475785}
   m_Layer: 7
-  m_Name: Enemy
+  m_Name: RoamerEnemy
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -242,7 +229,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 180
-  m_StoppingDistance: 1
+  m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -279,16 +266,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 0}
+  Type: 0
   Target: {fileID: 0}
   PatrolPoints: []
   WaitTime: 2
-  player: {fileID: 0}
   playerInRange: 0
   MaxPatrolPointNumber: 10
   TargetRange: 100
   TargetAngle: 60
   FollowTime: 2
   WasChasing: 0
+--- !u!136 &-246702853314475785
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7168428727462669568}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 0.25
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7168428727534022113
 GameObject:
   m_ObjectHideFlags: 0
@@ -300,6 +301,7 @@ GameObject:
   - component: {fileID: 7168428727534022114}
   - component: {fileID: 7168428727534022116}
   - component: {fileID: 7168428727534022115}
+  - component: {fileID: 7182902885984294470}
   m_Layer: 7
   m_Name: Capsule
   m_TagString: Player
@@ -372,3 +374,17 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &7182902885984294470
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7168428727534022113}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}

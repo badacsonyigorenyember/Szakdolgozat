@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = System.Object;
 using Random = UnityEngine.Random;
 
 public static class LogicGeneration
@@ -37,7 +38,7 @@ public static class LogicGeneration
         }
 
         for (int i = 0; i < enemyCount; i++) {
-            SpawnEnemy();
+            SpawnEnemy(i + 1);
         }
 
     }
@@ -54,7 +55,8 @@ public static class LogicGeneration
         PressurePlate plate = ObjectGeneration.GeneratePressurePlate(room, room);
         task.AddMechanism(plate);
         tasks["Start"] = task;
-        GameManager.TaskCount += 2;
+        
+        ObjectGeneration.SpawnEnemyInRoom(room, EnemyType.Spike);
 
     }
 
@@ -68,9 +70,21 @@ public static class LogicGeneration
         tasks["End"] = task;
     }
 
-    private static void SpawnEnemy() {
+    private static void SpawnEnemy(int numberOfEnemies) {
         Room room = FindRandomRoom(false);
-        ObjectGeneration.SpawnEnemyInRoom(room);
+        
+        
+        if (numberOfEnemies % GameManager.EveryNIsSpike == 0) {
+            ObjectGeneration.SpawnEnemyInRoom(room, EnemyType.Spike);
+        }
+
+        if (numberOfEnemies % GameManager.EveryNIsFollowerEnemy == 0) {
+            //TODO: ObjectGenerationSpawnEnemyInRoom(room, EnemyType.Follower);
+        }
+        else {
+            ObjectGeneration.SpawnEnemyInRoom(room, EnemyType.Roamer);
+        }
+        
     }
 
     private static Room FindNotArticularRoom(bool toDelete) {

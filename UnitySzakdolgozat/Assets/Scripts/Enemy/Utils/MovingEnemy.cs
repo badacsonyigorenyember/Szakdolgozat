@@ -8,16 +8,10 @@ public class MovingEnemy : Enemy
     protected NavMeshAgent Agent;
     protected Room ActualRoom;
 
-    protected override void Start() {
-        base.Start();
-        Debug.Log("MovingEnemy");
-    }
-
     protected virtual void Update() {
         if (Agent.isStopped) {
             return;
         }
-        PlayerCatch();
     }
 
     protected override void Init() {

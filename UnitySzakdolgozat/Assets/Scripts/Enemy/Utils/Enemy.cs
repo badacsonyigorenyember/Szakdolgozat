@@ -5,17 +5,17 @@ public abstract class Enemy : MonoBehaviour
 {
     public Room StartRoom;
     public Transform Player;
+    public EnemyType Type;
 
     protected virtual void Start() {
         Player = GameManager.Player.transform;
         GameManager.AddEnemy(this);
-        Debug.Log("Enemy");
     }
 
-    protected abstract void Init(); 
+    protected abstract void Init();
 
-    protected void PlayerCatch() {
-        if (Vector3.Distance(Player.transform.position, transform.position) < 0.5f) {
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Player")) {
             GameManager.Respawn();
         }
     }

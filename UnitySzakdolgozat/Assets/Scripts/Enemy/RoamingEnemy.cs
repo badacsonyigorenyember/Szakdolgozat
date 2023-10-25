@@ -25,6 +25,7 @@ public class RoamingEnemy : MovingEnemy
     protected override void Start() {
         base.Start();
         Init();
+        Type = EnemyType.Roamer;
     }
 
     protected override void Init() {

@@ -14,4 +14,9 @@ public class StationaryEnemy : Enemy
     public override void Resume() {
         IsMoving = true;
     }
+
+    public void SetBasePosition(Vector3 position) {
+        BasePosition = position;
+    }
+    
 }

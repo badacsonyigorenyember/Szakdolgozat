@@ -8,16 +8,18 @@ public static class GameManager
 {
     public static List<Room> Rooms;
     public static List<Room> AvailableRooms;
-    public static int RoomCount = 5;
+    public static int RoomCount = 6;
     private static int ActualRooms;
     public static int MapSize = 30;
     public static int MaxRoomSize = 20;
     
     public static Map Map;
     
-    public static int TaskCount = 5;
+    public static int TaskCount = 3;
     public static int EnemyCount = 1;
     private static int EveryNIsPressurePlate = 5;
+    public static int EveryNIsSpike = 2;
+    public static int EveryNIsFollowerEnemy = 5;
     public static int CompletedTasksCount;
     
     public static float LookingSensitivity = 400f;
@@ -46,7 +48,7 @@ public static class GameManager
     
     public static void GenerateMap() {
         MapGeneration.GenerateMap(RoomCount, MapSize, MaxRoomSize);
-        LogicGeneration.CreateGameMechanic(AvailableRooms, TaskCount, EveryNIsPressurePlate, EnemyCount);
+        LogicGeneration.CreateGameMechanic(AvailableRooms, TaskCount - 2, EveryNIsPressurePlate, EnemyCount);
         
         CompletedTasksCount = 0;
         
@@ -59,6 +61,7 @@ public static class GameManager
             OutputTutorial();
             NeedsTutorial = false;
         }
+        
     }
 
     public static void TaskCompleted(bool completed) {
@@ -74,7 +77,7 @@ public static class GameManager
 
     private static async void OutputTutorial() {
         TextMeshProUGUI TutorialText = GameObject.Find("TutorialText").GetComponent<TextMeshProUGUI>();
-        TutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it? (Press 'E' to interact! To pick up a box press MB1)";
+        TutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it? (Press 'E' to interact! To pick up a box press MB1! Enemies Won't see you if you stand still!)";
 
         await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(10));
 
@@ -83,7 +86,10 @@ public static class GameManager
 
     public static void Respawn() {
         Room playerRoom = Player.starterRoom;
+        Player.GetComponent<CharacterController>().enabled = false;
         Player.transform.position = new Vector3(playerRoom.area.center.x, 0, playerRoom.area.center.y);
+        Player.GetComponent<CharacterController>().enabled = true;
+
         
         foreach (var enemy in Enemies) {
             if(enemy.TryGetComponent(out MovingEnemy movingEnemy))

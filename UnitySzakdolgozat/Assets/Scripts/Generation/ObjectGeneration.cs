@@ -43,19 +43,45 @@ public class ObjectGeneration : MonoBehaviour
         GenerateDoors(room);
     }
 
-    public static void SpawnEnemyInRoom(Room room) {
-        if (prefabs.TryGetValue("Enemy", out GameObject enemyPrefab)) {
-            Vector2 pos = room.area.center;
-            GameObject enemyObj = Instantiate(enemyPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
-            enemyObj.name = "Enemy";
-            enemyObj.GetComponent<Enemy>().StartRoom = room;
+    public static void SpawnEnemyInRoom(Room room, EnemyType type) {
+        GameObject enemyPrefab;
+        
+        switch (type) {
+            case EnemyType.Roamer:
+                if (prefabs.TryGetValue("RoamerEnemy", out enemyPrefab)) {
+                    Vector2 pos = room.area.center;
+                    
+                    GameObject enemyObj = Instantiate(enemyPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+                    
+                    enemyObj.name = "RoamerEnemy";
+                    enemyObj.GetComponent<Enemy>().StartRoom = room;
+                }
+
+                break;
+            
+            case EnemyType.Spike:
+                if (prefabs.TryGetValue("Spike", out enemyPrefab)) {
+                    foreach (var entrance in room.entrancePositions) {
+                        Vector3 pos = new Vector3(entrance.x, -0.5f, entrance.y);
+                        GameObject enemyObj = Instantiate(enemyPrefab, pos, Quaternion.identity);
+                        
+                        enemyObj.name = "Spike";
+                        SpikeEnemy enemy = enemyObj.GetComponent<SpikeEnemy>();
+                        
+                        enemy.StartRoom = room;
+                        enemy.SetBasePosition(pos);
+                    }
+                    
+                }
+                
+                break;
+            
+            case EnemyType.Follower:
+                break;
         }
+        
     }
-    
-   
-    
-    
-    
+
     public static Button GenerateButton(Room room) {
         Vector2 buttonPos = room.GetRandomWallPosition();
 
@@ -155,4 +181,5 @@ public class ObjectGeneration : MonoBehaviour
 
         return plate;
     }
+    
 }
