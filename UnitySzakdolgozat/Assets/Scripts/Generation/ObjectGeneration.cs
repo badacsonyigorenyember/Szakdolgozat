@@ -110,7 +110,7 @@ public class ObjectGeneration : MonoBehaviour
 
             }
             
-            GameObject buttonObj = Instantiate(buttonPrefab, new Vector3(buttonPos.x, 1, buttonPos.y), buttonRotation);
+            GameObject buttonObj = Instantiate(buttonPrefab, new Vector3(buttonPos.x, 0.75f, buttonPos.y), buttonRotation);
             buttonObj.tag = "Map";
 
             button = buttonObj.GetComponent<Button>();

@@ -1,26 +1,13 @@
-using System.Collections;
 using UnityEngine;
 
-public class EndOfMap : MonoBehaviour, IInteractableObject
+public class EndOfMap : MonoBehaviour
 {
     public float duration;
-    private bool Activated;
-    public bool IsStationary { get; } = true;
 
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Player")) {
+            GameManager.NextLevel();
+        }
+    }
     
-    public void Action() {
-        if (!Activated) {
-            StartCoroutine(EndCoroutine());
-        }
-    }
-
-    private IEnumerator EndCoroutine() {
-        Debug.Log("End");
-        float timer = 0;
-        while (timer < duration) {
-            timer += Time.deltaTime;
-            yield return null;
-        }
-        GameManager.NextLevel();
-    }
 }

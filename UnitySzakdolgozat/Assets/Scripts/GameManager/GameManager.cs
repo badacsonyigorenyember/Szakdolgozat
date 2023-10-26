@@ -8,19 +8,20 @@ public static class GameManager
 {
     public static List<Room> Rooms;
     public static List<Room> AvailableRooms;
-    public static int RoomCount = 5;
+    public static int RoomCount = 15;
     private static int ActualRooms;
     public static int MapSize = 30;
     public static int MaxRoomSize = 20;
     
     public static Map Map;
     
-    public static int TaskCount = 3;
-    public static int EnemyCount = 1;
+    public static int TaskCount;
+    public static int EnemyCount;
     private static int EveryNIsPressurePlate = 5;
     public static int EveryNIsSpike = 2;
-    public static int EveryNIsFollowerEnemy = 2;
+    public static int EveryNIsFollowerEnemy = 5;
     public static int CompletedTasksCount;
+    private static int DeathCount;
     
     public static float LookingSensitivity = 400f;
 
@@ -47,6 +48,9 @@ public static class GameManager
     }
     
     public static void GenerateMap() {
+        //RoomCount = Mathf.Max(RoomCount, 5);
+        EnemyCount = (RoomCount - 3) / 2;
+        TaskCount = (RoomCount - 4) * 2;
         MapGeneration.GenerateMap(RoomCount, MapSize, MaxRoomSize);
         LogicGeneration.CreateGameMechanic(AvailableRooms, TaskCount - 2, EveryNIsPressurePlate, EnemyCount);
         
@@ -58,7 +62,7 @@ public static class GameManager
         TaskText.text = "Tasks: " + 0 + "/" + TaskCount;
 
         if (NeedsTutorial) {
-            OutputTutorial();
+            OutputTutorialText();
             NeedsTutorial = false;
         }
         
@@ -75,7 +79,7 @@ public static class GameManager
         TaskText.text = "Tasks: " + CompletedTasksCount + "/" + TaskCount;
     }
 
-    private static async void OutputTutorial() {
+    private static async void OutputTutorialText() {
         TextMeshProUGUI TutorialText = GameObject.Find("TutorialText").GetComponent<TextMeshProUGUI>();
         TutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it? (Press 'E' to interact! To pick up a box press MB1! Enemies Won't see you if you stand still!)";
 
@@ -85,6 +89,7 @@ public static class GameManager
     }
 
     public static void Respawn() {
+        OutputDeathText();
         Room playerRoom = Player.starterRoom;
         Player.GetComponent<CharacterController>().enabled = false;
         Player.transform.position = new Vector3(playerRoom.area.center.x, 0, playerRoom.area.center.y);
@@ -97,10 +102,16 @@ public static class GameManager
         }
     }
 
+    public static void OutputDeathText() {
+        DeathCount++;
+        TextMeshProUGUI deathText = GameObject.Find("DeathCountText").GetComponent<TextMeshProUGUI>();
+
+        deathText.text = "Number of deaths: " + DeathCount;
+    }
+
     public static void NextLevel() {
-        TaskCount += 2;
+        DeathCount = 0;
         RoomCount++;
-        EnemyCount = (RoomCount - 3) / 2;
         
         Enemies.Clear();
         SceneManager.LoadScene("SampleScene");

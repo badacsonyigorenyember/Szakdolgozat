@@ -52,6 +52,7 @@ public static class LogicGeneration
         PressurePlate plate = ObjectGeneration.GeneratePressurePlate(room, room);
         task.AddMechanism(plate);
         tasks["Start"] = task;
+        GameManager.TaskCount += 2;
     }
 
     private static void EndRoom() {
