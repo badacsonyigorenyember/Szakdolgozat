@@ -77,6 +77,14 @@ public class ObjectGeneration : MonoBehaviour
                 break;
             
             case EnemyType.Follower:
+                if (prefabs.TryGetValue("FollowerEnemy", out enemyPrefab)) {
+                    Vector2 pos = room.area.center;
+                    
+                    GameObject enemyObj = Instantiate(enemyPrefab, new Vector3(pos.x, 0, pos.y), Quaternion.identity);
+                    
+                    enemyObj.name = "FollowerEnemy";
+                    enemyObj.GetComponent<Enemy>().StartRoom = room;
+                }
                 break;
         }
         

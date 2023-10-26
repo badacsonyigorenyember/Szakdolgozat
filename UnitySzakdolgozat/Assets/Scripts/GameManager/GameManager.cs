@@ -8,7 +8,7 @@ public static class GameManager
 {
     public static List<Room> Rooms;
     public static List<Room> AvailableRooms;
-    public static int RoomCount = 6;
+    public static int RoomCount = 5;
     private static int ActualRooms;
     public static int MapSize = 30;
     public static int MaxRoomSize = 20;
@@ -19,7 +19,7 @@ public static class GameManager
     public static int EnemyCount = 1;
     private static int EveryNIsPressurePlate = 5;
     public static int EveryNIsSpike = 2;
-    public static int EveryNIsFollowerEnemy = 5;
+    public static int EveryNIsFollowerEnemy = 2;
     public static int CompletedTasksCount;
     
     public static float LookingSensitivity = 400f;

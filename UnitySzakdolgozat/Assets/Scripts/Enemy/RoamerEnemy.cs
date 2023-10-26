@@ -4,10 +4,9 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class RoamingEnemy : MovingEnemy
+public class RoamerEnemy : MovingEnemy
 {
     public Room PreviousRoom;
-    public GameObject Target;
 
     public List<Vector3> PatrolPoints;
 
@@ -26,6 +25,7 @@ public class RoamingEnemy : MovingEnemy
         base.Start();
         Init();
         Type = EnemyType.Roamer;
+        ChasingState = EnemyState.Chasing;
     }
 
     protected override void Init() {
@@ -181,10 +181,5 @@ public class RoamingEnemy : MovingEnemy
 
             PatrolPoints.Add(new(point.x, 0, point.y));
         }
-    }
-    
-    void Move(Vector3 position) {
-        State = EnemyState.Moving;
-        Agent.SetDestination(position);
     }
 }

@@ -18,10 +18,7 @@ public static class LogicGeneration
         tasks = new Dictionary<string, Task>();
         availableRooms = rooms;
         
-        //tutorial
         Tutorial();
-        
-        //endroom
         EndRoom();
 
         for (int i = 0; i < taskCount; i++) {
@@ -55,9 +52,6 @@ public static class LogicGeneration
         PressurePlate plate = ObjectGeneration.GeneratePressurePlate(room, room);
         task.AddMechanism(plate);
         tasks["Start"] = task;
-        
-        ObjectGeneration.SpawnEnemyInRoom(room, EnemyType.Spike);
-
     }
 
     private static void EndRoom() {
@@ -72,18 +66,20 @@ public static class LogicGeneration
 
     private static void SpawnEnemy(int numberOfEnemies) {
         Room room = FindRandomRoom(false);
-        
-        
+
         if (numberOfEnemies % GameManager.EveryNIsSpike == 0) {
             ObjectGeneration.SpawnEnemyInRoom(room, EnemyType.Spike);
         }
 
+        EnemyType enemy;
         if (numberOfEnemies % GameManager.EveryNIsFollowerEnemy == 0) {
-            //TODO: ObjectGenerationSpawnEnemyInRoom(room, EnemyType.Follower);
+            enemy = EnemyType.Follower;
         }
         else {
-            ObjectGeneration.SpawnEnemyInRoom(room, EnemyType.Roamer);
+            enemy = EnemyType.Roamer;
         }
+        
+        ObjectGeneration.SpawnEnemyInRoom(room, enemy);
         
     }
 

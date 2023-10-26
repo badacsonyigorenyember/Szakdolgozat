@@ -4,13 +4,22 @@ using Vector3 = UnityEngine.Vector3;
 
 public class MovingEnemy : Enemy
 {
-    protected EnemyState State;
+    public EnemyState State;
     protected NavMeshAgent Agent;
     protected Room ActualRoom;
-
+    protected GameObject Target;
+    protected EnemyState ChasingState;
+    
     protected virtual void Update() {
         if (Agent.isStopped) {
             return;
+        }
+
+        if (State == ChasingState) {
+            gameObject.GetComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/EnemyFollowing");
+        }
+        else {
+            gameObject.GetComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/EnemyBase");
         }
     }
 
@@ -31,5 +40,10 @@ public class MovingEnemy : Enemy
 
     public void Respawn() {
         Init();
+    }
+    
+    protected void Move(Vector3 position) {
+        State = EnemyState.Moving;
+        Agent.SetDestination(position);
     }
 }
