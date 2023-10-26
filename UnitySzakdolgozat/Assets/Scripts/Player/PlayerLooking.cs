@@ -1,37 +1,20 @@
-using System;
 using UnityEngine;
 
 public class PlayerLooking : MonoBehaviour
 {
-    public static PlayerLooking instance;
-    
-    private float sensitivity;
-
+    public float sensitivity;
     public Transform player;
-
     private float xRotation;
+    public bool canLook;
 
-    private bool canLook;
-
-    private void Awake() {
-        instance = this;
-    }
-
-    public void SetProperties(float s, Transform p) {
+    public void Initialize(float s, Transform p) {
         sensitivity = s;
         player = p;
-    }
-
-    public void SetSensitivity(float value) {
-        sensitivity = value;
-    }
-
-    private void Start() {
         xRotation = 0;
         canLook = true;
     }
 
-    void Update() {
+    public void Look() {
         if (canLook) {
             float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * sensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * sensitivity;

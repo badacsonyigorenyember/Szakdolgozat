@@ -1,63 +1,149 @@
 using System.Collections.Generic;
-using System.Linq;
-using GeometryUtils;
+using TMPro;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using UnityEngine.SceneManagement;
+using System;
 
-public class GameManager : MonoBehaviour
+public static class GameManager
 {
-    public static GameManager instance;
+    public static List<Room> Rooms;
+    public static List<Room> AvailableRooms;
+    public static int RoomCount = 15;
+    private static int ActualRooms;
+    public static int MapSize = 30;
+    public static int MaxRoomSize = 20;
     
-    public static List<Room> rooms;
-    public static List<Room> availableRooms;
-    public int roomCount;
-    private int actualRooms;
-    public int mapSize;
-    public int maxRoomSize;
-
-    public Canvas gameUI;
+    public static Map Map;
     
-    public static bool[,] map;
-
-    public static Transform player;
+    public static int TaskCount;
+    public static int EnemyCount;
+    private static int EveryNIsPressurePlate = 5;
+    public static int EveryNIsSpike = 2;
+    public static int EveryNIsFollowerEnemy = 5;
+    public static int CompletedTasksCount;
+    private static int DeathCount;
     
-    private Room playerRoom;
-    private Room endRoom;
+    public static float LookingSensitivity = 400f;
 
+    private static List<Enemy> Enemies = new ();
 
+    public static GameObject Menu;
+    public static PlayerController Player;
+    private static TextMeshProUGUI TaskText;
 
+    private static bool NeedsTutorial = true;
+    
 
-    private void Start() {
-        instance = this;
+    public static void SetPlayer(PlayerController player) {
+        Player = player;
+    }
+
+    public static void SetSensitivity(float value) {
+        LookingSensitivity = value;
+        Player.looking.sensitivity = value;
+    }
+
+    public static void AddEnemy(Enemy enemy) {
+        Enemies.Add(enemy);
+    }
+    
+    public static void GenerateMap() {
+        //RoomCount = Mathf.Max(RoomCount, 5);
+        EnemyCount = (RoomCount - 3) / 2;
+        TaskCount = (RoomCount - 4) * 2;
+        MapGeneration.GenerateMap(RoomCount, MapSize, MaxRoomSize);
+        LogicGeneration.CreateGameMechanic(AvailableRooms, TaskCount - 2, EveryNIsPressurePlate, EnemyCount);
         
-        GameStart();
+        CompletedTasksCount = 0;
         
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        gameUI.gameObject.SetActive(false);
+        Menu = GameObject.Find("Menu");
+        
+        TaskText = GameObject.Find("TaskCountText").GetComponent<TextMeshProUGUI>();
+        TaskText.text = "Tasks: " + 0 + "/" + TaskCount;
+
+        if (NeedsTutorial) {
+            OutputTutorialText();
+            NeedsTutorial = false;
+        }
         
     }
 
-    void GameStart() {
-        MapGeneration.GenerateMap(roomCount, mapSize, maxRoomSize);
-        GenerationUtils.CreateGameMechanic(availableRooms, playerRoom, endRoom);
+    public static void TaskCompleted(bool completed) {
+        if (completed) {
+            CompletedTasksCount++;
+        }
+        else {
+            CompletedTasksCount--;
+        }
+
+        TaskText.text = "Tasks: " + CompletedTasksCount + "/" + TaskCount;
     }
-    
-    public void Pause() {
-            gameUI.gameObject.SetActive(true);
+
+    private static async void OutputTutorialText() {
+        TextMeshProUGUI TutorialText = GameObject.Find("TutorialText").GetComponent<TextMeshProUGUI>();
+        TutorialText.text = "Hmm... Where am I? What happened?? Anyway, there is a button. What will happen, if I push it? (Press 'E' to interact! To pick up a box press MB1! Enemies Won't see you if you stand still!)";
+
+        await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(10));
+
+        TutorialText.text = "";
+    }
+
+    public static void Respawn() {
+        OutputDeathText();
+        Room playerRoom = Player.starterRoom;
+        Player.GetComponent<CharacterController>().enabled = false;
+        Player.transform.position = new Vector3(playerRoom.area.center.x, 0, playerRoom.area.center.y);
+        Player.GetComponent<CharacterController>().enabled = true;
+
+        
+        foreach (var enemy in Enemies) {
+            if(enemy.TryGetComponent(out MovingEnemy movingEnemy))
+                movingEnemy.Respawn();
+        }
+    }
+
+    public static void OutputDeathText() {
+        DeathCount++;
+        TextMeshProUGUI deathText = GameObject.Find("DeathCountText").GetComponent<TextMeshProUGUI>();
+
+        deathText.text = "Number of deaths: " + DeathCount;
+    }
+
+    public static void NextLevel() {
+        DeathCount = 0;
+        RoomCount++;
+        
+        Enemies.Clear();
+        SceneManager.LoadScene("SampleScene");
+    }
+
+    public static void Pause() {
+            Menu.SetActive(true);
+            
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            player.Find("FirstPersonCamera").GetComponent<PlayerLooking>().enabled = false;
+            
+            Player.CanLook(false);
+            
+            foreach (var enemy in Enemies) {
+                enemy.Stop();
+            }
     }
     
-    public void Resume() {
-        gameUI.gameObject.SetActive(false);
+    public static void Resume() {
+        Menu.SetActive(false);
+        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        player.Find("FirstPersonCamera").GetComponent<PlayerLooking>().enabled = true;
+        
+        Player.CanLook(true);
+        
+        foreach (var enemy in Enemies) {
+            enemy.Resume();
+        }
     }
 
-    public static void EndGame() {
+    public static void QuitGame() {
         Application.Quit();
     }
 }

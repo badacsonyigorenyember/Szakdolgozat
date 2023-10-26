@@ -1,171 +1,227 @@
-
 using System.Collections.Generic;
 using GeometryUtils;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Rendering;
+using Utils;
 
 public class MapGeneration : MonoBehaviour
 {
+    private static NavMeshSurface floorNavMesh;
+    
     public static void GenerateMap(int roomCount, int mapSize, int maxRoomSize) {
-        GameManager.rooms = RoomGeneration.CreateRooms(roomCount, mapSize, maxRoomSize);
-        List<Room> rooms = GameManager.rooms;
-        GameManager.availableRooms = rooms;
-        GameManager.map = new bool[(mapSize + maxRoomSize) * 2 + 1, (mapSize + maxRoomSize) * 2 + 1];
-        rooms.ForEach(r => r.ClaimArea(GameManager.map));
+        float time = Time.realtimeSinceStartup;
+        List<Room> rooms;
+        (rooms, mapSize) = RoomGeneration.CreateRooms(roomCount, mapSize, maxRoomSize);
+        GameManager.AvailableRooms = rooms;
+        GameManager.Map = new Map((mapSize + maxRoomSize) * 2 + 1);
+        rooms.ForEach(r => r.ClaimArea(GameManager.Map));
         
         List<Edge> edges = Delaunay.FinalEdges(rooms);
+        Debug.Log("háromszög után: " + (Time.realtimeSinceStartup - time));
 
-        Delaunay.PathFinding(edges, rooms, GameManager.map);
-        GenerateWalls(GameManager.map, 3);
+        Delaunay.PathFinding(edges, GameManager.Map);
+
+        GameObject map = new GameObject {name = "Map", tag = "Map" };
+        GenerateFloor(GameManager.Map, map);
+        GenerateWalls(GameManager.Map, map);
+
+        GameManager.Rooms = rooms;
+        Debug.Log("minden után: " + (Time.realtimeSinceStartup - time));
+        
     }
+
+    public static void BuildNavMesh() {
+        floorNavMesh.BuildNavMesh();
+    }
+
     
-    public static void GenerateRooms(List<Room> rooms, int mapSize) {
-        List<Vector3> verticies = new List<Vector3>();
-        List<int> triangles = new List<int>();
-            
-        foreach (var room in rooms) { 
-            Vector3 bottomLeft = new Vector3(room.Position.x - .5f, 0, room.Position.y - .5f);
-            Vector3 topLeft = new Vector3(room.Position.x - .5f, 0, room.Position.y + room.height + .5f);
-            Vector3 bottomRigth = new Vector3(room.Position.x + room.width + .5f, 0, room.Position.y - .5f);
-            Vector3 topRight = new Vector3(room.Position.x + room.width + .5f, 0, room.Position.y + room.height + .5f);
-    
-            Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-            for (int i = 0; i < 6; i++) {
-                verticies.Add(v[i]);
-                triangles.Add(triangles.Count);
+
+    private static void GenerateFloor(Map map, GameObject go) {
+        GameObject floorPrefab = Resources.Load<GameObject>("Prefabs/Floor");
+
+        List<CombineInstance> floorInstances = new List<CombineInstance>();
+        List<CombineInstance> ceilingInstances = new List<CombineInstance>();
+        
+        for(int x = 0; x < map.Size; x++ ){
+            for (int y = 0; y < map.Size; y++) {
+                if (map[x, y] == FieldType.Room || map[x, y] == FieldType.Corridor) {
+                    GameObject obj = Instantiate(floorPrefab, new Vector3(x, 0, y), Quaternion.identity);
+
+                    Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh; 
+                    Matrix4x4 localToWorldMatrix = obj.transform.localToWorldMatrix;
+                    
+                    floorInstances.Add(new CombineInstance
+                    {
+                        mesh = mesh,
+                        transform = localToWorldMatrix
+                    });
+
+                    Transform t = obj.transform;
+                    t.position = new Vector3(x, 3, y);
+                    t.rotation = Quaternion.Euler(180, 0, 0);
+                    localToWorldMatrix = t.localToWorldMatrix;
+                    ceilingInstances.Add(new CombineInstance
+                    {
+                        mesh = mesh,
+                        transform = localToWorldMatrix
+                    });
+                    
+                    Destroy(obj);
+                }
             }
-                
         }
 
-        Mesh mesh = new Mesh()
+        GameObject floor = new GameObject
         {
-            vertices = verticies.ToArray(),
-            triangles = triangles.ToArray()
+            name = "Floor",
+            layer = LayerMask.NameToLayer("Ground"),
+            transform = { parent = go.transform }
         };
-        mesh.RecalculateNormals();
+        
+        GameObject ceiling = new GameObject { name = "Ceiling" , transform = { parent = go.transform }};
 
-        GameObject o = new GameObject()
-        {
-            transform = { position = new Vector3(mapSize, 0, mapSize) }
-        };
-        o.AddComponent<MeshFilter>().mesh = mesh;
-        o.AddComponent<MeshCollider>().sharedMesh = mesh;
-        o.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));
-        o.layer = LayerMask.NameToLayer("Ground");
+        Mesh floorMesh = new Mesh{ indexFormat = IndexFormat.UInt32 };
+        floorMesh.CombineMeshes(floorInstances.ToArray());
+        floorMesh.RecalculateNormals();
+        floorMesh.RecalculateTangents();
+
+        Mesh ceilingMesh = new Mesh {indexFormat = IndexFormat.UInt32 };
+        ceilingMesh.CombineMeshes(ceilingInstances.ToArray());
+        ceilingMesh.RecalculateNormals();
+        ceilingMesh.RecalculateTangents();
+
+        floor.AddComponent<MeshFilter>().mesh = floorMesh;
+        floor.AddComponent<MeshCollider>().sharedMesh = floorMesh;
+        floor.AddComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/Floor", typeof(Material));
+        
+        floor.AddComponent<NavMeshSurface>();
+
+        floorNavMesh = floor.GetComponent<NavMeshSurface>();
+        
+        
+        
+        ceiling.AddComponent<MeshFilter>().mesh = ceilingMesh;
+        ceiling.AddComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/Ceiling", typeof(Material));
+
     }
     
-    public static void GenerateCorridors(bool[,] map) {
-            List<Vector3> verticies = new List<Vector3>();
-            List<int> triangles = new List<int>();
 
-            for (int x = 0; x < map.GetLength(0); x++) {
-                for (int y = 0; y < map.GetLength(1); y++) {
-                    if (map[x, y]) {
-                        GameManager.map[x, y] = true;
-                        Vector3 bottomLeft = new Vector3(x - .5f, 0, y - .5f);
-                        Vector3 topLeft = new Vector3(x - .5f, 0, y + .5f);
-                        Vector3 bottomRigth = new Vector3(x + .5f, 0, y - .5f);
-                        Vector3 topRight = new Vector3(x + .5f, 0, y + .5f);
-    
-                        Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-                        for (int j = 0; j < 6; j++) {
-                            verticies.Add(v[j]);
-                            triangles.Add(triangles.Count);
-                        }
-                    }
+    private static void GenerateWalls(Map map, GameObject go) {
+        GameObject wallPrefab = Resources.Load<GameObject>("Prefabs/Wall");
+        
+        List<CombineInstance> wallInstances = new List<CombineInstance>();
+        List<CombineInstance> skirtingInstances = new List<CombineInstance>();
+
+        for (int x = 0; x < map.Size; x++) {
+            for (int y = 0; y < map.Size; y++) {
+                if (map[x, y] != FieldType.Null) {
+                    if (x > 0 && map[x - 1, y] == FieldType.Null) { //left
+                        GameObject obj = Instantiate(wallPrefab, new Vector3(x, 0, y), Quaternion.Euler(0, 180, 0));
+
+                        wallInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(0).localToWorldMatrix
+                        });
+                        skirtingInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(1).localToWorldMatrix
+                        });
                         
-                }
-            }
-            
-            
-            Mesh mesh = new Mesh()
-            {
-                vertices = verticies.ToArray(),
-                triangles = triangles.ToArray()
-            };
-            mesh.RecalculateNormals();
-            GameObject g = new GameObject()
-            {
-                name = "Rooms"
-            };
-            g.AddComponent<MeshFilter>().mesh = mesh;
-            g.AddComponent<MeshCollider>().sharedMesh = mesh;
-            g.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));
+                        Destroy(obj);
 
-    }
-
-    public static void GenerateWalls(bool[,] map, int wallHeight) {
-        List<Vector3> verticies = new List<Vector3>();
-        List<int> triangles = new List<int>();
-
-        for(int x = 0; x < map.GetLength(0); x++ ){
-            for (int y = 0; y < map.GetLength(1); y++) {
-                if (map[x, y]) {
-                    if (x > 0 && !map[x - 1, y]) { //left
-                        Vector3 bottomLeft = new Vector3(x - .5f, 0, y - .5f);
-                        Vector3 topLeft = new Vector3(x - .5f, wallHeight, y - .5f);
-                        Vector3 bottomRigth = new Vector3(x - .5f, 0, y + .5f);
-                        Vector3 topRight = new Vector3(x - .5f, wallHeight, y + .5f);
-                        
-                        Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-                        for (int j = 0; j < 6; j++) {
-                            verticies.Add(v[j]);
-                            triangles.Add(triangles.Count);
-                        }
                     }
 
-                    if (x < map.GetLength(0) - 1 && !map[x + 1, y]) { //right
-                        Vector3 bottomLeft = new Vector3(x + .5f, 0, y + .5f);
-                        Vector3 topLeft = new Vector3(x + .5f, wallHeight, y + .5f);
-                        Vector3 bottomRigth = new Vector3(x + .5f, 0, y - .5f);
-                        Vector3 topRight = new Vector3(x + .5f, wallHeight, y - .5f);
+                    if (x < map.Size - 1 && map[x + 1, y] == FieldType.Null) { //right
+                        GameObject obj = Instantiate(wallPrefab, new Vector3(x, 0, y), Quaternion.Euler(0, 0, 0));
+                        wallInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(0).localToWorldMatrix
+                        });
+                        skirtingInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(1).localToWorldMatrix
+                        });
                         
-                        Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-                        for (int j = 0; j < 6; j++) {
-                            verticies.Add(v[j]);
-                            triangles.Add(triangles.Count);
-                        }
+                        Destroy(obj);
                     }
 
-                    if (y > 0 && !map[x, y - 1]) { //down
-                        Vector3 bottomLeft = new Vector3(x + .5f, 0, y - .5f);
-                        Vector3 topLeft = new Vector3(x + .5f, wallHeight, y - .5f);
-                        Vector3 bottomRigth = new Vector3(x - .5f, 0, y - .5f);
-                        Vector3 topRight = new Vector3(x - .5f, wallHeight, y - .5f);
+                    if (y > 0 && map[x, y - 1] == FieldType.Null) { //down
+                        GameObject obj = Instantiate(wallPrefab, new Vector3(x, 0, y), Quaternion.Euler(0, 90, 0));
+                        wallInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(0).localToWorldMatrix
+                        });
+                        skirtingInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(1).localToWorldMatrix
+                        });
                         
-                        Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-                        for (int j = 0; j < 6; j++) {
-                            verticies.Add(v[j]);
-                            triangles.Add(triangles.Count);
-                        }
+                        Destroy(obj);
                     }
 
-                    if (y < map.GetLength(1) - 1 && !map[x, y + 1]) { //up
-                        Vector3 bottomLeft = new Vector3(x - .5f, 0, y + .5f);
-                        Vector3 topLeft = new Vector3(x - .5f, wallHeight, y + .5f);
-                        Vector3 bottomRigth = new Vector3(x + .5f, 0, y + .5f);
-                        Vector3 topRight = new Vector3(x + .5f, wallHeight, y + .5f);
+                    if (y < map.Size - 1 && map[x, y + 1] == FieldType.Null) { //up
+                        GameObject obj = Instantiate(wallPrefab, new Vector3(x, 0, y), Quaternion.Euler(0, -90, 0));
+                        wallInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(0).localToWorldMatrix
+                        });
+                        skirtingInstances.Add(new CombineInstance
+                        {
+                            mesh = obj.transform.GetChild(1).GetComponent<MeshFilter>().sharedMesh,
+                            transform = obj.transform.GetChild(1).localToWorldMatrix
+                        });
                         
-                        Vector3[] v = {bottomLeft, topLeft, topRight, bottomLeft, topRight, bottomRigth};
-                        for (int j = 0; j < 6; j++) {
-                            verticies.Add(v[j]);
-                            triangles.Add(triangles.Count);
-                        }
+                        Destroy(obj);
                     }
                 }
-                    
             }
         }
         
-        Mesh mesh = new Mesh()
+        GameObject wallSide = new GameObject
         {
-            vertices = verticies.ToArray(),
-            triangles = triangles.ToArray()
+            name = "Wallside",
+            transform =
+            {
+                parent = go.transform
+            }
         };
-        mesh.RecalculateNormals();
-        GameObject g = new GameObject();
-        g.AddComponent<MeshFilter>().mesh = mesh;
-        g.AddComponent<MeshCollider>().sharedMesh = mesh;
-        g.AddComponent<MeshRenderer>().material = (Material) Resources.Load("FloorMaterial", typeof(Material));
+
+        GameObject skirting = new GameObject
+        {
+            name = "Skirting",
+            transform =
+            {
+                parent = go.transform
+            }
+        };
+
+        Mesh wallMesh = new Mesh{ indexFormat = IndexFormat.UInt32 };
+        wallMesh.CombineMeshes(wallInstances.ToArray());
+        wallMesh.RecalculateNormals();
+        wallMesh.RecalculateTangents();
+
+        Mesh skirtingMesh = new Mesh {indexFormat = IndexFormat.UInt32 };
+        skirtingMesh.CombineMeshes(skirtingInstances.ToArray());
+        skirtingMesh.RecalculateNormals();
+        skirtingMesh.RecalculateTangents();
+
+
+        wallSide.AddComponent<MeshFilter>().mesh = wallMesh;
+        wallSide.AddComponent<MeshCollider>().sharedMesh = wallMesh;
+        wallSide.AddComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/Wall", typeof(Material));
+
+        skirting.AddComponent<MeshFilter>().mesh = skirtingMesh;
+        skirting.AddComponent<MeshRenderer>().material = (Material) Resources.Load("Materials/Skirting", typeof(Material));
+
     }
+    
 }
 

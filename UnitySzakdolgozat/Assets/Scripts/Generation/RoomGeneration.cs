@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class RoomGeneration
+public static class RoomGeneration
 {
-    public static List<Room> CreateRooms(int roomCount, int mapSize, int maxRoomSize) {
+    public static (List<Room>, int) CreateRooms(int roomCount, int mapSize, int maxRoomSize) {
         List<Room> rooms = new List<Room>();
         int attempts = 0;
         int actualRooms = 0;
         while (actualRooms < roomCount) {
-            if (attempts == 5000) {
+            if (attempts >= 5000) {
                 mapSize += mapSize / 2;
                 attempts = 0;
             }
@@ -26,16 +26,13 @@ public class RoomGeneration
                 attempts++;
 
         }
-            
-        MapGeneration.GenerateRooms(rooms, mapSize);
-
-        //todo switch these two
         
         foreach (var room in rooms) {
-            room.Position += new Vector2(mapSize, mapSize);
-        }
+            room.area.setPosition(room.area.position + new Vector2(mapSize, mapSize));
 
-        return rooms;
+        }
+        
+        return (rooms, mapSize);
 
     }
 }    

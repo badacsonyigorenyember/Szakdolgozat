@@ -1,10 +1,7 @@
-using System;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public static PlayerMovement instance; 
-    
     private float speed;
     private float gravity;
     private float jump;
@@ -16,12 +13,9 @@ public class PlayerMovement : MonoBehaviour
 
     Vector3 velocity;
     bool isGrounded;
+    public bool isMoving;
 
-    private void Awake() {
-        instance = this;
-    }
-
-    public void SetProperties(float s, float g, float j, Transform gc) {
+    public void Initialize(float s, float g, float j, Transform gc) {
         speed = s;
         gravity = g;
         jump = j;
@@ -30,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
     }
 
-    public void Update() {
+    public void Move() {
         isGrounded = Physics.CheckSphere(groundCheck.position, 0.4f, groundMask);
 
         if(isGrounded && velocity.y < 0)
@@ -41,9 +35,16 @@ public class PlayerMovement : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        Vector3 move = transform.right * x + transform.forward * z;
+        if (x != 0 || z != 0) {
+            isMoving = true;
+        } else {
+            isMoving = false;
+        }
 
-        controller.Move(move * speed * Time.deltaTime);
+        Transform trans = transform;
+        Vector3 move = trans.right * x + trans.forward * z;
+
+        controller.Move(move * (speed * Time.deltaTime));
 
         if(Input.GetButtonDown("Jump") && isGrounded)
         {

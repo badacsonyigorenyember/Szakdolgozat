@@ -1,11 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EndOfMap : MonoBehaviour, InteractableObject
+public class EndOfMap : MonoBehaviour
 {
-    public void Action() {
-        Debug.Log("End");
-        Application.Quit();
+    public float duration;
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Player")) {
+            GameManager.NextLevel();
+        }
     }
+    
 }
